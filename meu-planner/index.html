@@ -1,0 +1,1480 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Planner digital em estilo scrapbook: tarefas, metas, humor, leituras, ideias e adesivos.">
+<meta name="theme-color" content="#f1e1dc">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Meu Planner">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="48x48" href="icons/favicon-48.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Meu Planner Scrapbook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Nunito:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: mural rosado pontilhado com uma "folha" de papel quadriculado por página; cartões presos com fita washi; adesivos flutuam por cima da folha. */
+:root {
+  --board: #f1e1dc;
+  --board-dot: #e2c9c2;
+  --paper: #fffcf7;
+  --grid: #efe6dc;
+  --ink: #4a3b3f;
+  --ink-soft: #85727a;
+  --line: #e6d8d0;
+  --blush: #f29aa6;
+  --blush-soft: #fbdde1;
+  --butter: #f6d06a;
+  --butter-soft: #fbedc2;
+  --sage: #8fbf9a;
+  --sage-soft: #d9ecd9;
+  --lilac: #b3a2e0;
+  --lilac-soft: #e6defa;
+  --sky: #86bfe0;
+  --sky-soft: #d7ecf8;
+  --accent: #d9677a;
+  --font-hand: "Caveat", "Segoe Print", "Comic Sans MS", cursive;
+  --font-body: "Nunito", "Trebuchet MS", system-ui, sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { min-height: 100%; }
+body {
+  background-color: var(--board);
+  background-image: radial-gradient(var(--board-dot) 1.4px, transparent 1.5px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.45;
+  padding-inline: 16px;
+  padding-block: 0 48px;
+}
+button, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+
+/* ---------- barra superior ---------- */
+.topbar {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30;
+  max-width: 1040px; margin: 0 auto;
+  display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 10px;
+  padding-top: 12px;
+  background: linear-gradient(var(--board) 80%, transparent);
+}
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-end; max-width: 100%; }
+.tab { flex: none; }
+.tab[data-v="humor"] { background: var(--butter-soft); }
+.tab[data-v="ideias"] { background: var(--sky-soft); }
+.tab {
+  border: 2px solid var(--ink); border-bottom: none;
+  border-radius: 14px 14px 0 0;
+  padding: 8px 18px 6px;
+  background: var(--paper);
+  font-family: var(--font-hand); font-size: 26px; font-weight: 700; line-height: 1;
+  transform: translateY(4px);
+  transition: transform .15s;
+}
+.tab[data-v="dia"] { background: var(--blush-soft); }
+.tab[data-v="metas"] { background: var(--sage-soft); }
+.tab[data-v="leituras"] { background: var(--lilac-soft); }
+.tab[aria-selected="true"] { transform: translateY(0); padding-bottom: 12px; }
+.tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding-bottom: 8px; }
+.datebox {
+  display: flex; align-items: center; gap: 2px;
+  background: var(--paper); border: 2px solid var(--ink); border-radius: 999px; padding: 2px 4px;
+}
+.datebox input {
+  border: none; background: transparent; font-weight: 700; font-size: 15px; padding: 6px 4px; min-height: 36px;
+  font-variant-numeric: tabular-nums;
+}
+.round {
+  width: 38px; height: 38px; border-radius: 50%; border: none; background: transparent;
+  display: grid; place-items: center; font-size: 22px; font-weight: 800;
+}
+.round:hover { background: var(--blush-soft); }
+.pill {
+  border: 2px solid var(--ink); border-radius: 999px; padding: 7px 14px; background: var(--paper);
+  font-weight: 800; font-size: 15px; display: inline-flex; align-items: center; gap: 6px; min-height: 42px;
+}
+.pill.hot { background: var(--butter); }
+.pill svg { width: 22px; height: 22px; }
+
+/* ---------- folha ---------- */
+.sheet {
+  position: relative;
+  max-width: 1040px; margin: 0 auto;
+  min-height: 70vh;
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 26px 26px;
+  border: 2px solid var(--ink);
+  border-radius: 4px 18px 18px 18px;
+  box-shadow: 6px 8px 0 rgba(74, 59, 63, .12);
+  padding: 28px clamp(14px, 3.5vw, 40px) 40px;
+}
+.sheet-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 18px; margin-bottom: 22px; }
+.eyebrow { font-size: 13px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); }
+h1 {
+  font-family: var(--font-hand); font-weight: 700; font-size: clamp(44px, 7vw, 64px); line-height: .95; margin: 2px 0 0;
+  text-wrap: balance;
+}
+h1 .hl { background: linear-gradient(transparent 58%, var(--butter-soft) 58%, var(--butter-soft) 92%, transparent 92%); padding-inline: 4px; }
+h2 { font-family: var(--font-hand); font-weight: 700; font-size: 32px; line-height: 1; margin: 0 0 12px; }
+.sub { color: var(--ink-soft); font-weight: 600; }
+.status { font-size: 13px; color: var(--ink-soft); font-weight: 700; }
+
+/* ---------- cartões com fita ---------- */
+.card {
+  position: relative; background: var(--paper);
+  border: 2px solid var(--ink); border-radius: 10px;
+  padding: 26px 18px 18px; min-width: 0;
+  box-shadow: 3px 4px 0 rgba(74, 59, 63, .10);
+}
+.card::before {
+  content: ""; position: absolute; top: -13px; left: 50%; width: 110px; height: 26px;
+  transform: translateX(-50%) rotate(-3deg);
+  background: repeating-linear-gradient(45deg, var(--tape, var(--blush)) 0 8px, rgba(255,255,255,.45) 8px 14px);
+  opacity: .85; border-radius: 2px;
+  clip-path: polygon(3% 0, 97% 0, 100% 20%, 97% 40%, 100% 60%, 97% 80%, 100% 100%, 3% 100%, 0 80%, 3% 60%, 0 40%, 3% 20%, 0 0);
+}
+.card.t-butter { --tape: var(--butter); }
+.card.t-sage { --tape: var(--sage); }
+.card.t-lilac { --tape: var(--lilac); }
+.card.t-sky { --tape: var(--sky); }
+.card.tilt-l { transform: rotate(-.6deg); }
+.card.tilt-r { transform: rotate(.5deg); }
+
+/* ---------- página do dia ---------- */
+.day-grid { display: grid; gap: 30px 26px; grid-template-columns: 1fr; }
+@media (min-width: 760px) { .day-grid { grid-template-columns: 1.35fr 1fr; } }
+.side { display: grid; gap: 30px; align-content: start; min-width: 0; }
+.tasks { list-style: none; margin: 0 0 14px; padding: 0; display: grid; gap: 8px; }
+.task {
+  --c: var(--blush);
+  display: flex; align-items: center; gap: 6px;
+  border: 2px dashed var(--line); border-radius: 12px; padding: 4px 6px;
+  background: var(--paper);
+  transition: background-color .25s, border-color .25s;
+}
+.task.done { background: var(--c); border-style: solid; border-color: var(--ink); }
+.task .t {
+  flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px;
+  background: none; border: none; text-align: left; padding: 8px 4px; min-height: 44px;
+}
+.box {
+  flex: none; width: 26px; height: 26px; border: 2px solid var(--ink); border-radius: 7px;
+  display: grid; place-items: center; background: var(--paper);
+}
+.box svg { width: 18px; height: 18px; opacity: 0; transform: scale(.4); transition: transform .2s, opacity .2s; }
+.task.done .box svg { opacity: 1; transform: scale(1); }
+.txt { overflow-wrap: anywhere; font-weight: 600; }
+.task.done .txt { text-decoration: line-through; text-decoration-thickness: 2px; }
+.dot {
+  flex: none; width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--ink);
+  background: var(--c); margin-left: 4px;
+}
+.ic { flex: none; width: 38px; height: 38px; border: none; background: transparent; border-radius: 10px; display: grid; place-items: center; color: var(--ink-soft); }
+.ic:hover { background: rgba(74, 59, 63, .08); color: var(--ink); }
+.ic svg { width: 20px; height: 20px; }
+.task input.edit { flex: 1; min-width: 0; border: none; border-bottom: 2px solid var(--ink); background: transparent; padding: 8px 4px; font-weight: 600; }
+.add { display: flex; gap: 8px; }
+.add input {
+  flex: 1; min-width: 0; border: 2px solid var(--ink); border-radius: 12px; background: var(--paper);
+  padding: 10px 12px; min-height: 46px;
+}
+.btn {
+  border: 2px solid var(--ink); border-radius: 12px; background: var(--butter); font-weight: 800;
+  padding: 10px 16px; min-height: 46px; box-shadow: 2px 3px 0 var(--ink);
+}
+.btn:active { transform: translate(2px, 3px); box-shadow: none; }
+.hint { color: var(--ink-soft); font-size: 14px; margin: 10px 0 0; }
+.empty { border: 2px dashed var(--line); border-radius: 12px; padding: 16px; color: var(--ink-soft); font-weight: 600; text-align: center; }
+.counter { font-family: var(--font-hand); font-size: 24px; font-weight: 700; color: var(--ink-soft); margin-left: 6px; }
+textarea {
+  width: 100%; min-height: 170px; resize: vertical; border: none; outline-offset: 4px;
+  background: repeating-linear-gradient(transparent 0 31px, var(--line) 31px 33px);
+  line-height: 33px; font-family: var(--font-hand); font-size: 24px; padding: 0 2px;
+}
+.chips { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.chip { min-width: 0; }
+.chip {
+  --c: var(--sky); --cs: var(--sky-soft);
+  display: flex; align-items: center; gap: 8px; padding: 10px 12px; min-height: 52px;
+  border: 2px solid var(--ink); border-radius: 14px; background: var(--paper); font-weight: 800; text-align: left;
+  transition: background-color .25s;
+}
+.chip svg { width: 24px; height: 24px; flex: none; }
+.chip[aria-pressed="true"] { background: var(--c); }
+.chip .mini { margin-left: auto; width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--ink); background: var(--paper); flex: none; }
+.chip[aria-pressed="true"] .mini { background: var(--ink); box-shadow: inset 0 0 0 3px var(--c); }
+
+/* ---------- metas ---------- */
+.habits { display: grid; gap: 34px 24px; grid-template-columns: 1fr; }
+@media (min-width: 700px) { .habits { grid-template-columns: 1fr 1fr; } }
+.habit { --c: var(--sky); --cs: var(--sky-soft); }
+.habit-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+.habit-head .icon { width: 46px; height: 46px; border-radius: 50%; border: 2px solid var(--ink); background: var(--cs); display: grid; place-items: center; flex: none; }
+.habit-head .icon svg { width: 26px; height: 26px; }
+.habit-head h2 { margin: 0; }
+.habit-head .n { margin-left: auto; font-family: var(--font-hand); font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.bar { height: 10px; border: 2px solid var(--ink); border-radius: 999px; overflow: hidden; margin: 6px 0 14px; background: var(--paper); }
+.bar span { display: block; height: 100%; background: var(--c); transition: width .3s; }
+.cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
+.cal .wd { font-size: 12px; font-weight: 800; color: var(--ink-soft); padding-bottom: 2px; }
+.cal button {
+  aspect-ratio: 1; max-width: 100%; border-radius: 50%; border: 2px solid var(--line); background: var(--paper);
+  font-weight: 800; font-size: 15px; font-variant-numeric: tabular-nums; padding: 0; min-height: 36px;
+  transition: background-color .2s, border-color .2s, transform .15s;
+}
+.cal button.today { border-color: var(--ink); border-style: dashed; }
+.cal button[aria-pressed="true"] { background: var(--c); border-color: var(--ink); border-style: solid; }
+.cal button:active { transform: scale(.9); }
+.h-agua { --c: var(--sky); --cs: var(--sky-soft); }
+.h-treino { --c: var(--blush); --cs: var(--blush-soft); }
+.h-estudo { --c: var(--lilac); --cs: var(--lilac-soft); }
+.h-autocuidado { --c: var(--sage); --cs: var(--sage-soft); }
+
+/* ---------- leituras ---------- */
+.books { display: grid; gap: 34px 22px; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
+.book { display: flex; flex-direction: column; gap: 8px; padding-top: 22px; }
+.cover {
+  position: relative; display: grid; place-items: center; aspect-ratio: 2 / 3; max-width: 100%;
+  border: 2px dashed var(--ink-soft); border-radius: 6px; background: var(--lilac-soft); overflow: hidden; cursor: pointer;
+  text-align: center; font-weight: 700; color: var(--ink-soft); font-size: 14px; padding: 10px;
+}
+.cover.has { border: 2px solid var(--ink); padding: 0; background: var(--paper); }
+.cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cover svg { width: 34px; height: 34px; display: block; margin: 0 auto 6px; }
+.cover input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.book input.f {
+  width: 100%; min-width: 0; border: none; border-bottom: 2px dotted var(--line); background: transparent; padding: 4px 2px;
+}
+.book input.f.title { font-family: var(--font-hand); font-size: 26px; font-weight: 700; line-height: 1.1; }
+.book input.f.author { font-size: 14px; color: var(--ink-soft); font-weight: 600; }
+.stars { display: flex; gap: 0; }
+.stars button { border: none; background: none; padding: 3px; width: 34px; height: 38px; display: grid; place-items: center; }
+.stars svg { width: 28px; height: 28px; }
+.stars svg path { fill: var(--paper); stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; transition: fill .15s; }
+.stars button.on svg path { fill: var(--butter); }
+.linkbtn { border: none; background: none; color: var(--ink-soft); font-size: 13px; font-weight: 700; text-decoration: underline; padding: 6px 0; align-self: flex-start; }
+.linkbtn.warn { color: var(--accent); }
+.addbook {
+  border: 2px dashed var(--ink); border-radius: 10px; background: transparent; min-height: 260px;
+  display: grid; place-items: center; align-content: center; gap: 8px; font-family: var(--font-hand); font-size: 28px; font-weight: 700;
+}
+.addbook span.plus { width: 54px; height: 54px; border-radius: 50%; background: var(--butter); border: 2px solid var(--ink); display: grid; place-items: center; font-family: var(--font-body); font-size: 30px; }
+.summary { display: flex; flex-wrap: wrap; gap: 10px; }
+.tag { border: 2px solid var(--ink); border-radius: 999px; padding: 4px 12px; background: var(--paper); font-weight: 800; font-size: 14px; font-variant-numeric: tabular-nums; }
+
+/* ---------- humor ---------- */
+.moods { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.mood {
+  --mc: var(--butter);
+  display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px 6px; min-height: 76px;
+  border: 2px dashed var(--line); border-radius: 14px; background: var(--paper); font-weight: 800; font-size: 13px;
+  transition: background-color .2s, border-color .2s;
+}
+.mood svg { width: 40px; height: 40px; transition: transform .2s; }
+.mood[aria-pressed="true"] { background: var(--mc); border: 2px solid var(--ink); }
+.mood[aria-pressed="true"] svg { transform: scale(1.12) rotate(-6deg); }
+.mood-grid { display: grid; gap: 30px 26px; grid-template-columns: 1fr; }
+@media (min-width: 760px) { .mood-grid { grid-template-columns: 1.2fr 1fr; } }
+.mcal button { position: relative; display: grid; place-items: center; overflow: hidden; }
+.mcal button svg { width: 88%; height: 88%; }
+.mcal button.has { border-color: var(--ink); background: var(--mc); }
+.mcal button.sel { box-shadow: 0 0 0 3px var(--paper), 0 0 0 5px var(--ink); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.legend .tag { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px 3px 4px; }
+.legend svg { width: 24px; height: 24px; }
+.mnote {
+  width: 100%; margin-top: 12px; border: none; border-bottom: 2px dotted var(--line); background: transparent;
+  font-family: var(--font-hand); font-size: 24px; padding: 4px 2px;
+}
+.mlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.mlist li { display: flex; align-items: flex-start; gap: 10px; padding-bottom: 8px; border-bottom: 2px dotted var(--line); }
+.mlist li svg { width: 34px; height: 34px; flex: none; }
+.mlist b { display: block; font-size: 14px; }
+.mlist span { font-family: var(--font-hand); font-size: 22px; line-height: 1.1; overflow-wrap: anywhere; }
+.mlist li > div { min-width: 0; }
+
+/* ---------- ideias ---------- */
+.idea-new { margin-bottom: 34px; }
+.idea-new textarea { min-height: 99px; }
+.idea-new .row { display: flex; justify-content: flex-end; margin-top: 8px; }
+.ideas { display: grid; gap: 26px 20px; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); align-items: start; }
+.note {
+  --nc: var(--butter-soft);
+  position: relative; background: var(--nc); border: 2px solid var(--ink); border-radius: 4px 4px 18px 4px;
+  padding: 22px 14px 8px; box-shadow: 3px 4px 0 rgba(74, 59, 63, .12); min-width: 0;
+}
+.note:nth-child(3n+1) { transform: rotate(-1.2deg); }
+.note:nth-child(3n+2) { transform: rotate(.8deg); }
+.note::before {
+  content: ""; position: absolute; top: -9px; left: 50%; width: 18px; height: 18px; transform: translateX(-50%);
+  border-radius: 50%; background: var(--accent); border: 2px solid var(--ink); box-shadow: inset -3px -3px 0 rgba(0,0,0,.15);
+}
+.note.fav { box-shadow: 3px 4px 0 rgba(74, 59, 63, .12), 0 0 0 4px var(--butter); }
+.note textarea {
+  background: none; min-height: 66px; resize: none; overflow: hidden; line-height: 1.2; font-size: 25px; padding: 0;
+}
+.note footer { display: flex; align-items: center; gap: 2px; margin-top: 4px; }
+.note .ndate { font-size: 12px; font-weight: 800; color: var(--ink-soft); margin-right: auto; text-transform: uppercase; letter-spacing: .06em; }
+.note .dot { background: var(--nc); }
+.note .fav-btn[aria-pressed="true"] svg path { fill: var(--butter); }
+.note .fav-btn svg path { fill: none; stroke: currentColor; stroke-width: 2; stroke-linejoin: round; }
+.note .warn { color: var(--paper); background: var(--accent); }
+
+/* ---------- adesivos ---------- */
+.stickers { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
+.stk {
+  position: absolute; pointer-events: auto; touch-action: none; user-select: none; -webkit-user-select: none;
+  filter: drop-shadow(2.5px 0 0 #fff) drop-shadow(-2.5px 0 0 #fff) drop-shadow(0 2.5px 0 #fff) drop-shadow(0 -2.5px 0 #fff) drop-shadow(1px 3px 3px rgba(74,59,63,.25));
+  cursor: grab;
+}
+.stk svg { display: block; width: 100%; height: auto; pointer-events: none; }
+.stk.sel { outline: 2px dashed var(--ink); outline-offset: 6px; border-radius: 6px; filter: drop-shadow(2.5px 0 0 #fff) drop-shadow(-2.5px 0 0 #fff) drop-shadow(0 2.5px 0 #fff) drop-shadow(0 -2.5px 0 #fff); }
+.stk-tools {
+  position: absolute; z-index: 6; display: flex; gap: 4px; padding: 4px; pointer-events: auto;
+  background: var(--ink); border-radius: 999px; transform: translate(-50%, -100%);
+}
+.stk-tools button { width: 40px; height: 40px; border-radius: 50%; border: none; background: var(--paper); font-weight: 800; font-size: 18px; display: grid; place-items: center; }
+.stk-tools button svg { width: 20px; height: 20px; }
+
+.tray {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+  background: var(--paper); border-top: 2px solid var(--ink);
+  border-radius: 22px 22px 0 0; box-shadow: 0 -8px 24px rgba(74,59,63,.18);
+  padding: 14px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+  max-height: 52vh; overflow-y: auto;
+}
+.tray-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; max-width: 1040px; margin: 0 auto 10px; }
+.tray-head h2 { margin: 0; }
+.tray-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); gap: 10px; max-width: 1040px; margin: 0 auto; }
+.tray-grid button {
+  border: 2px dashed var(--line); border-radius: 14px; background: var(--paper); aspect-ratio: 1; padding: 10px;
+  display: grid; place-items: center;
+}
+.tray-grid button:hover { border-color: var(--ink); background: var(--blush-soft); }
+.tray-grid svg { width: 100%; height: auto; max-height: 100%; }
+
+.bk { max-width: 640px; margin: 0 auto; display: grid; gap: 12px; }
+.bk p { margin: 0; }
+.bk-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.bk-row label { cursor: pointer; position: relative; }
+.vh { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
+.bk-confirm { border: 2px dashed var(--ink); border-radius: 14px; padding: 12px 14px; display: grid; gap: 10px; background: var(--butter-soft); }
+
+.install-bar {
+  position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 45;
+  width: min(560px, calc(100% - 32px)); display: flex; align-items: center; gap: 12px;
+  background: var(--paper); border: 2px solid var(--ink); border-radius: 18px; padding: 10px 8px 10px 12px;
+  box-shadow: 4px 6px 0 rgba(74, 59, 63, .18);
+}
+.install-bar img { width: 48px; height: 48px; border-radius: 12px; border: 2px solid var(--ink); flex: none; }
+.install-bar p { margin: 0; flex: 1; min-width: 0; font-weight: 700; font-size: 14px; line-height: 1.35; }
+.install-bar .btn { flex: none; }
+.share-ic { display: inline-block; width: 18px; height: 18px; vertical-align: -3px; }
+
+.toast {
+  position: fixed; left: 50%; top: calc(16px + env(safe-area-inset-top, 0px)); transform: translateX(-50%);
+  z-index: 50; background: var(--ink); color: var(--paper); padding: 10px 18px; border-radius: 999px; font-weight: 700;
+  max-width: calc(100% - 32px); text-align: center;
+}
+.av {
+  width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--ink); background: var(--blush-soft);
+  display: inline-grid; place-items: center; font-weight: 800; font-size: 14px; flex: none;
+}
+.gate-wrap { display: grid; place-items: start center; padding-block: 4vh 8vh; }
+.gate-card { width: 100%; max-width: 480px; display: grid; gap: 14px; }
+.gate-card h1 { margin-bottom: 4px; }
+.gate-card h2 { margin: 6px 0 0; }
+.who { display: grid; gap: 8px; }
+.whob {
+  display: flex; align-items: center; gap: 10px; text-align: left; min-height: 52px; padding: 8px 12px;
+  border: 2px solid var(--ink); border-radius: 14px; background: var(--paper); font-weight: 700;
+}
+.whob:hover { background: var(--blush-soft); }
+.whob .av { width: 34px; height: 34px; font-size: 16px; background: var(--butter-soft); }
+.whob .em { min-width: 0; overflow-wrap: anywhere; }
+.whob .lk { margin-left: auto; font-size: 12px; font-weight: 800; color: var(--ink-soft); white-space: nowrap; }
+.gate-form { display: grid; gap: 6px; }
+.gate-form label { font-weight: 800; font-size: 14px; margin-top: 6px; }
+.gate-form label .sub { font-weight: 600; }
+.gate-form input { border: 2px solid var(--ink); border-radius: 12px; background: var(--paper); padding: 10px 12px; min-height: 46px; min-width: 0; }
+.gate-form .btn { margin-top: 10px; }
+.gate-err { margin: 4px 0 0; color: var(--accent); font-weight: 800; }
+.loading { display: grid; place-items: center; min-height: 50vh; font-family: var(--font-hand); font-size: 34px; color: var(--ink-soft); text-align: center; }
+
+@keyframes pop { 0% { transform: scale(1); } 40% { transform: scale(1.04); } 100% { transform: scale(1); } }
+.task.just { animation: pop .3s ease; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+@media (max-width: 520px) {
+  .tab { font-size: 21px; padding-inline: 10px; }
+  .tools { width: 100%; justify-content: space-between; }
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <nav class="tabs" role="tablist" aria-label="Páginas do planner">
+    <button class="tab" role="tab" id="tab-dia" data-v="dia">Meu dia</button>
+    <button class="tab" role="tab" id="tab-metas" data-v="metas">Metas</button>
+    <button class="tab" role="tab" id="tab-humor" data-v="humor">Humor</button>
+    <button class="tab" role="tab" id="tab-leituras" data-v="leituras">Leituras</button>
+    <button class="tab" role="tab" id="tab-ideias" data-v="ideias">Ideias</button>
+  </nav>
+  <div class="tools">
+    <div class="datebox">
+      <button class="round" id="prev" aria-label="Anterior">‹</button>
+      <input type="date" id="datePick" aria-label="Escolher data no calendário">
+      <button class="round" id="next" aria-label="Próximo">›</button>
+    </div>
+    <button class="pill" id="todayBtn">Hoje</button>
+    <button class="pill hot" id="stickerBtn" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6-5.3-3-5.3 3 1.2-6L3.4 9.3l6-.7z" fill="#fff"/></svg>
+      Adesivos
+    </button>
+    <button class="pill" id="whoBtn" hidden><span class="av" aria-hidden="true"></span>Trocar</button>
+    <button class="pill" id="backupBtn" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5"/><path d="M5 17v3h14v-3"/></svg>
+      Backup
+    </button>
+  </div>
+</header>
+
+<main class="sheet" id="sheet">
+  <div class="loading" id="view">Abrindo seu planner…</div>
+  <div class="stickers" id="stickers"></div>
+</main>
+
+<div class="tray" id="tray" hidden>
+  <div class="tray-head">
+    <h2>Escolha um adesivo</h2>
+    <button class="pill" id="trayClose">Fechar</button>
+  </div>
+  <div class="tray-grid" id="trayGrid"></div>
+  <p class="hint" style="max-width:1040px;margin:12px auto 0">Toque para colar. Arraste para mover. Toque no adesivo para aumentar, diminuir, girar ou tirar.</p>
+</div>
+<div class="tray" id="backup" hidden>
+  <div class="tray-head">
+    <h2>Backup do planner</h2>
+    <button class="pill" id="bkClose">Fechar</button>
+  </div>
+  <div class="bk">
+    <p>O backup guarda tudo num arquivo no seu aparelho: tarefas, metas, humor, livros com capas, ideias e adesivos. Com ele você recupera tudo aqui ou em outra cópia do planner.</p>
+    <p class="sub" id="bkLast"></p>
+    <div class="bk-row">
+      <button class="btn" id="bkSave">Baixar backup</button>
+      <label class="pill" for="bkFile">Restaurar de um arquivo<input type="file" id="bkFile" class="vh" accept=".json,application/json"></label>
+    </div>
+    <div class="bk-confirm" id="bkConfirm" hidden>
+      <p id="bkMsg"></p>
+      <div class="bk-row">
+        <button class="btn" id="bkGo">Restaurar agora</button>
+        <button class="pill" id="bkCancel">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="install-bar" id="installBar" role="region" aria-label="Instalar o app" hidden>
+  <img id="installImg" alt="" width="48" height="48">
+  <p id="installText"></p>
+  <button class="btn" id="installBtn" hidden>Instalar</button>
+  <button class="ic" id="installClose" aria-label="Fechar aviso">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+  </button>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(() => {
+  /* ===== utilidades ===== */
+  const $ = (s, el = document) => el.querySelector(s);
+  const pad = n => String(n).padStart(2, '0');
+  const isoDay = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const isoMonth = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}`;
+  const parseDay = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  const MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+  const DIAS = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'];
+  const daysIn = d => new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  const clone = o => JSON.parse(JSON.stringify(o));
+
+  let toastT;
+  function toast(msg, ms = 2600) {
+    const t = $('#toast'); t.textContent = msg; t.hidden = false;
+    clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, ms);
+  }
+
+  /* ===== armazenamento: conta (db) ou navegador ===== */
+  // Chaves antigas ficam em "planner:<chave>"; cada perfil (e-mail) fica em "planner:p~<e-mail>~<chave>".
+  const isLegacyKey = k => k.startsWith('planner:') && !k.startsWith('planner:ui-') && !k.startsWith('planner:p~');
+  function localStore(prefix) {
+    const owns = prefix === 'planner:' ? isLegacyKey : (k => k.startsWith(prefix));
+    return {
+      async get(k) { try { const v = localStorage.getItem(prefix + k); return v ? JSON.parse(v) : null; } catch (e) { return null; } },
+      async set(k, v) { localStorage.setItem(prefix + k, JSON.stringify(v)); },
+      async del(k) { try { localStorage.removeItem(prefix + k); } catch (e) {} },
+      async all() {
+        const out = {};
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && owns(k)) { try { out[k.slice(prefix.length)] = JSON.parse(localStorage.getItem(k)); } catch (e) {} }
+        }
+        return out;
+      }
+    };
+  }
+  const local = localStore('planner:');
+  function cloud(db, id) {
+    const col = db.collection('data/users/' + id);
+    return {
+      async get(k) { const s = await col.doc(k).get(); return s.exists ? clone(s.data()) : null; },
+      set: (k, v) => col.doc(k).set(v),
+      del: k => col.doc(k).delete(),
+      async all() {
+        const snap = await col.limit(1000).get();
+        const out = {};
+        snap.docs.forEach(d => { if (d.exists) out[d.id] = clone(d.data()); });
+        return out;
+      }
+    };
+  }
+  function googleStore() {
+    const call = (fn, ...a) => new Promise((res, rej) => {
+      google.script.run.withSuccessHandler(res)
+        .withFailureHandler(e => rej({ code: 'unavailable', message: String((e && e.message) || e) }))[fn](...a);
+    });
+    return {
+      async get(k) { const s = await call('ler', k); return s ? JSON.parse(s) : null; },
+      set: (k, v) => call('salvar', k, JSON.stringify(v)),
+      del: k => call('apagar', k),
+      async all() {
+        const m = JSON.parse(await call('tudo')); const out = {};
+        Object.keys(m).forEach(k => { try { out[k] = JSON.parse(m[k]); } catch (e) {} });
+        return out;
+      },
+      setMany: obj => call('salvarVarios', JSON.stringify(obj)),
+      backup: () => call('fazerBackup')
+    };
+  }
+  let store = local;
+  let mode = 'local';
+  const cache = new Map();
+  const timers = {}, chains = {};
+  async function load(k, fallback) {
+    if (!cache.has(k)) {
+      let v = null;
+      try { v = await store.get(k); } catch (e) { v = null; }
+      cache.set(k, v ?? fallback);
+    }
+    return cache.get(k);
+  }
+  function queue(k, fn) {
+    chains[k] = (chains[k] || Promise.resolve()).then(fn).catch(err => {
+      if (err && err.code === 'quota_exceeded') toast('O espaço do planner encheu. Apague capas ou páginas antigas.');
+      else toast('Não consegui salvar agora. Tente de novo em instantes.');
+    });
+  }
+  function save(k, v, delay = 450) {
+    cache.set(k, v);
+    clearTimeout(timers[k]);
+    timers[k] = setTimeout(() => { timers[k] = null; queue(k, () => store.set(k, cache.get(k))); }, delay);
+  }
+  async function flushAll() {
+    Object.keys(timers).forEach(k => {
+      if (timers[k] && cache.has(k)) { clearTimeout(timers[k]); timers[k] = null; queue(k, () => store.set(k, cache.get(k))); }
+    });
+    await Promise.all(Object.values(chains));
+  }
+  function remove(k) {
+    cache.delete(k); clearTimeout(timers[k]);
+    queue(k, () => store.del(k));
+  }
+
+  /* ===== ícones ===== */
+  const I = {
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>',
+    pencil: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 20l1-4L16 5l3 3L8 19z"/><path d="M14 7l3 3"/></svg>',
+    x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+    rot: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M20 4v5h-5"/></svg>',
+    camera: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>',
+    star: '<svg viewBox="0 0 24 24"><path d="M12 2.8l2.8 5.8 6.3.8-4.6 4.4 1.2 6.3L12 17l-5.7 3.1 1.2-6.3L2.9 9.4l6.3-.8z"/></svg>'
+  };
+  const HABITS = [
+    { k: 'agua', name: 'Água', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="#4a3b3f" stroke-width="2" stroke-linejoin="round"><path d="M12 3c3 4.5 6 7.8 6 11a6 6 0 0 1-12 0c0-3.2 3-6.5 6-11z" fill="#fff"/><path d="M9.5 14.5a2.6 2.6 0 0 0 2.5 2.5" stroke-linecap="round"/></svg>' },
+    { k: 'treino', name: 'Treino', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="#4a3b3f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="9" width="3" height="6" rx="1" fill="#fff"/><rect x="18.5" y="9" width="3" height="6" rx="1" fill="#fff"/><rect x="5.5" y="7" width="3" height="10" rx="1" fill="#fff"/><rect x="15.5" y="7" width="3" height="10" rx="1" fill="#fff"/><path d="M8.5 12h7"/></svg>' },
+    { k: 'estudo', name: 'Estudo', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="#4a3b3f" stroke-width="2" stroke-linejoin="round"><path d="M3 5.5c3-1 6-1 9 1 3-2 6-2 9-1v13c-3-1-6-1-9 1-3-2-6-2-9-1z" fill="#fff"/><path d="M12 6.5v13"/></svg>' },
+    { k: 'autocuidado', name: 'Autocuidado', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="#4a3b3f" stroke-width="2" stroke-linejoin="round"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z" fill="#fff"/></svg>' }
+  ];
+  const TASK_COLORS = ['var(--blush)', 'var(--butter)', 'var(--sage)', 'var(--lilac)', 'var(--sky)'];
+  const NOTE_COLORS = ['var(--butter-soft)', 'var(--blush-soft)', 'var(--sage-soft)', 'var(--lilac-soft)', 'var(--sky-soft)'];
+
+  /* ===== humores ===== */
+  const MOODS = [
+    { k: 'incrivel', name: 'Incrível', c: '#f6d06a' },
+    { k: 'feliz', name: 'Feliz', c: '#8fbf9a' },
+    { k: 'normal', name: 'Normal', c: '#e9dccb' },
+    { k: 'cansaco', name: 'Cansaço', c: '#b3a2e0' },
+    { k: 'triste', name: 'Triste', c: '#86bfe0' },
+    { k: 'estresse', name: 'Estresse', c: '#f29aa6' }
+  ];
+  const moodOf = k => MOODS.find(m => m.k === k);
+  function moodFace(k) {
+    const m = moodOf(k); const S = 'stroke="#4a3b3f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"';
+    const eyes = '<circle cx="14.5" cy="17" r="2" fill="#4a3b3f"/><circle cx="25.5" cy="17" r="2" fill="#4a3b3f"/>';
+    const cheeks = '<ellipse cx="10.5" cy="23" rx="2.6" ry="1.6" fill="#e8808f" opacity=".55"/><ellipse cx="29.5" cy="23" rx="2.6" ry="1.6" fill="#e8808f" opacity=".55"/>';
+    const parts = {
+      incrivel: `<path ${S} d="M12 15.5q2.5-3 5 0M23 15.5q2.5-3 5 0"/><path d="M12.5 22h15a7.5 7.5 0 0 1-15 0z" fill="#4a3b3f"/>${cheeks}`,
+      feliz: `${eyes}<path ${S} d="M14 23q6 5.5 12 0"/>${cheeks}`,
+      normal: `${eyes}<path ${S} d="M15 25h10"/>`,
+      cansaco: `<path ${S} d="M12 17.5h5M23 17.5h5"/><ellipse cx="20" cy="26" rx="2.4" ry="2" ${S}/><path ${S} d="M30 6h4l-4 4h4" stroke-width="1.6"/>`,
+      triste: `${eyes}<path ${S} d="M14.5 27q5.5-5 11 0"/><path d="M11.5 20c0 2.5-1 3.5-1.6 3.5S8.4 22.5 9 20.5l1.5-3z" fill="#5aa6d6"/>`,
+      estresse: `<path ${S} d="M11.5 13.5l5 2.5M28.5 13.5l-5 2.5"/>${eyes}<path ${S} d="M13 26l2.4-2 2.4 2 2.4-2 2.4 2 2.4-2 2 2"/>`
+    };
+    return `<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17" fill="${m ? m.c : '#fff'}" stroke="#4a3b3f" stroke-width="2.2"/>${parts[k] || ''}</svg>`;
+  }
+  async function setMood(mk, dayNum, k) {
+    const doc = clone(await load(mk, null) || { days: {} });
+    const cur0 = doc.days[dayNum] || {};
+    const next = Object.assign({}, cur0, { m: k });
+    if (!next.m) delete next.m;
+    if (!next.m && !next.n) delete doc.days[dayNum]; else doc.days[dayNum] = next;
+    save(mk, doc, 300);
+    return doc;
+  }
+  const moodButtons = (sel) => MOODS.map(m => `<button class="mood" data-m="${m.k}" aria-pressed="${sel === m.k}" style="--mc:${m.c}">${moodFace(m.k)}<span>${m.name}</span></button>`).join('');
+
+  /* ===== adesivos (desenhados à mão em SVG) ===== */
+  const O = 'stroke="#4a3b3f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"';
+  const face = (x, y, s = 1) => `<circle cx="${x - 7 * s}" cy="${y}" r="${2.6 * s}" fill="#4a3b3f"/><circle cx="${x + 7 * s}" cy="${y}" r="${2.6 * s}" fill="#4a3b3f"/><path d="M${x - 3.5 * s} ${y + 5 * s}q${3.5 * s} ${3.5 * s} ${7 * s} 0" fill="none" stroke="#4a3b3f" stroke-width="2.4" stroke-linecap="round"/><ellipse cx="${x - 13 * s}" cy="${y + 5 * s}" rx="${4 * s}" ry="${2.5 * s}" fill="#f29aa6" opacity=".7"/><ellipse cx="${x + 13 * s}" cy="${y + 5 * s}" rx="${4 * s}" ry="${2.5 * s}" fill="#f29aa6" opacity=".7"/>`;
+  const STICKERS = {
+    coracao: `<svg viewBox="0 0 100 100"><path ${O} fill="#f29aa6" d="M50 86C22 66 8 50 12 33 16 17 38 13 50 30 62 13 84 17 88 33 92 50 78 66 50 86Z"/><path d="M26 34c2-6 8-9 13-8" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" opacity=".85"/></svg>`,
+    estrela: `<svg viewBox="0 0 100 100"><path ${O} fill="#f6d06a" d="M50 7l12.5 26 28.5 3.5-21 19.5 5.5 28.5L50 70.5 24.5 84.5 30 56 9 36.5l28.5-3.5z"/>${face(50, 50, .8)}</svg>`,
+    flor: `<svg viewBox="0 0 100 100"><g ${O} fill="#f7b8c6"><circle cx="50" cy="25" r="17"/><circle cx="73.8" cy="42.3" r="17"/><circle cx="64.7" cy="70.2" r="17"/><circle cx="35.3" cy="70.2" r="17"/><circle cx="26.2" cy="42.3" r="17"/></g><circle cx="50" cy="50" r="14" ${O} fill="#f6d06a"/></svg>`,
+    nuvem: `<svg viewBox="0 0 100 100"><path ${O} fill="#e3f2fb" d="M26 74h50a17 17 0 0 0 1-34 23 23 0 0 0-44-5 19 19 0 0 0-7 39z"/>${face(52, 56, .8)}</svg>`,
+    morango: `<svg viewBox="0 0 100 100"><path ${O} fill="#ef6f7f" d="M50 92C25 80 15 54 21 40c6-13 52-13 58 0 6 14-4 40-29 52z"/><g fill="#fde9a8"><ellipse cx="35" cy="52" rx="2.2" ry="3.2"/><ellipse cx="50" cy="56" rx="2.2" ry="3.2"/><ellipse cx="65" cy="52" rx="2.2" ry="3.2"/><ellipse cx="42" cy="68" rx="2.2" ry="3.2"/><ellipse cx="58" cy="68" rx="2.2" ry="3.2"/><ellipse cx="50" cy="80" rx="2.2" ry="3.2"/></g><path ${O} fill="#8fc49a" d="M28 38l9-14 7 9 6-14 6 14 7-9 9 14c-14 6-30 6-44 0z"/></svg>`,
+    laco: `<svg viewBox="0 0 100 100"><path ${O} fill="#e8808f" d="M45 54l-12 34 11-3 6 8V54zM55 54l12 34-11-3-6 8V54z"/><path ${O} fill="#f29aa6" d="M50 50L17 29c-8-4-12 4-11 21s3 25 11 20zM50 50l33-21c8-4 12 4 11 21s-3 25-11 20z"/><rect x="41" y="39" width="18" height="22" rx="7" ${O} fill="#f7b8c6"/></svg>`,
+    gatinho: `<svg viewBox="0 0 100 100"><path ${O} fill="#f9dcc0" d="M18 44L16 12l26 18zM82 44l2-32-26 18z"/><ellipse cx="50" cy="56" rx="38" ry="32" ${O} fill="#f9dcc0"/><path d="M22 20l8 14M78 20l-8 14" stroke="#f29aa6" stroke-width="4" stroke-linecap="round"/>${face(50, 55, 1.05)}<path d="M12 58h14M12 66l14-3M88 58H74M88 66l-14-3" stroke="#4a3b3f" stroke-width="2" stroke-linecap="round"/></svg>`,
+    arcoiris: `<svg viewBox="0 0 100 100"><g fill="none" stroke-linecap="round"><path d="M12 72a38 38 0 0 1 76 0" stroke="#4a3b3f" stroke-width="13"/><path d="M12 72a38 38 0 0 1 76 0" stroke="#f29aa6" stroke-width="8"/><path d="M21 72a29 29 0 0 1 58 0" stroke="#4a3b3f" stroke-width="12"/><path d="M21 72a29 29 0 0 1 58 0" stroke="#f6d06a" stroke-width="7"/><path d="M30 72a20 20 0 0 1 40 0" stroke="#4a3b3f" stroke-width="12"/><path d="M30 72a20 20 0 0 1 40 0" stroke="#8fbf9a" stroke-width="7"/></g><path ${O} fill="#fff" d="M6 82a9 9 0 0 1 8-12 9 9 0 0 1 16 4 7 7 0 0 1-2 8zM94 82a9 9 0 0 0-8-12 9 9 0 0 0-16 4 7 7 0 0 0 2 8z"/></svg>`,
+    brilho: `<svg viewBox="0 0 100 100"><path ${O} fill="#c9bdf0" d="M44 10c3 26 10 33 36 36-26 3-33 10-36 36-3-26-10-33-36-36 26-3 33-10 36-36z"/><path ${O} fill="#f6d06a" d="M80 58c1.5 10 4.5 13 14 14-9.5 1-12.5 4-14 14-1.5-10-4.5-13-14-14 9.5-1 12.5-4 14-14z"/></svg>`,
+    cogumelo: `<svg viewBox="0 0 100 100"><path ${O} fill="#fbf1e3" d="M36 58h28l4 26c0 7-36 7-36 0z"/><path ${O} fill="#ef6f7f" d="M10 60C10 32 30 14 50 14s40 18 40 46z"/><g fill="#fff"><circle cx="32" cy="36" r="6"/><circle cx="56" cy="28" r="5"/><circle cx="72" cy="46" r="6"/><circle cx="46" cy="50" r="4"/></g>${face(50, 70, .55)}</svg>`,
+    cafe: `<svg viewBox="0 0 100 100"><path d="M38 28c-5-6 5-10 0-17M52 28c-5-6 5-10 0-17" stroke="#4a3b3f" stroke-width="3" fill="none" stroke-linecap="round"/><path ${O} fill="none" d="M70 46c16-3 16 22-3 22"/><path ${O} fill="#f7b8c6" d="M18 36h56l-6 46c-1 7-43 7-44 0z"/><path fill="#fff" d="M46 66c-8-5-11-9-9-13s7-3 9 0c2-3 7-4 9 0s-1 8-9 13z"/></svg>`,
+    lua: `<svg viewBox="0 0 100 100"><path ${O} fill="#f6d06a" d="M58 10a40 40 0 1 0 32 58A33 33 0 0 1 58 10z"/><circle cx="34" cy="58" r="2.6" fill="#4a3b3f"/><path d="M40 66q4 3 8 0" stroke="#4a3b3f" stroke-width="2.4" fill="none" stroke-linecap="round"/><ellipse cx="28" cy="66" rx="4" ry="2.5" fill="#f29aa6" opacity=".7"/><path ${O} fill="#c9bdf0" d="M80 14l3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/></svg>`,
+    sol: `<svg viewBox="0 0 100 100"><g stroke="#4a3b3f" stroke-width="5" stroke-linecap="round"><path d="M50 6v12M50 82v12M6 50h12M82 50h12M19 19l8 8M73 73l8 8M81 19l-8 8M27 73l-8 8"/></g><circle cx="50" cy="50" r="25" ${O} fill="#f6d06a"/>${face(50, 50, .8)}</svg>`,
+    cereja: `<svg viewBox="0 0 100 100"><path d="M34 62C38 40 48 24 62 12M70 64C68 44 66 28 62 12" stroke="#4a3b3f" stroke-width="3.2" fill="none" stroke-linecap="round"/><path ${O} fill="#8fc49a" d="M62 12c10-6 22-2 26 6-10 4-20 2-26-6z"/><circle cx="32" cy="72" r="17" ${O} fill="#e05a6c"/><circle cx="70" cy="72" r="17" ${O} fill="#e05a6c"/><path d="M24 66a8 8 0 0 1 6-5M62 66a8 8 0 0 1 6-5" stroke="#fff" stroke-width="3.5" fill="none" stroke-linecap="round"/></svg>`,
+    academia: `<svg viewBox="0 0 100 100"><g transform="rotate(-24 50 54)"><rect x="24" y="48" width="52" height="12" rx="5" ${O} fill="#e9dccb"/><rect x="19" y="33" width="13" height="42" rx="5" ${O} fill="#f7b8c6"/><rect x="68" y="33" width="13" height="42" rx="5" ${O} fill="#f7b8c6"/><rect x="5" y="25" width="16" height="58" rx="6" ${O} fill="#f29aa6"/><rect x="79" y="25" width="16" height="58" rx="6" ${O} fill="#f29aa6"/><path d="M10 34v18M84 34v18" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".7"/></g><path ${O} fill="#f6d06a" stroke-width="2.5" d="M50 8c1.5 7 3.5 9 10 10-6.5 1-8.5 3-10 10-1.5-7-3.5-9-10-10 6.5-1 8.5-3 10-10z"/><path ${O} fill="#86bfe0" stroke-width="2.5" d="M70 78c3 5 5 8 5 11a5 5 0 0 1-10 0c0-3 2-6 5-11z"/></svg>`,
+    livro: `<svg viewBox="0 0 100 100"><path ${O} fill="#8fbf9a" d="M6 30c16-6 32-4 44 4 12-8 28-10 44-4v54c-16-6-32-4-44 4-12-8-28-10-44-4z"/><path ${O} fill="#fffcf7" d="M12 26c14-4 28-2 38 6v50c-10-8-24-10-38-6zM88 26c-14-4-28-2-38 6v50c10-8 24-10 38-6z"/><path d="M60 44q12-4 22-2M60 54q12-4 22-2M60 64q12-4 22-2" stroke="#e6d8d0" stroke-width="3" fill="none" stroke-linecap="round"/><path ${O} fill="#f29aa6" stroke-width="2.5" d="M42 30v26l5-5 5 5V34"/>${face(28, 54, .75)}</svg>`,
+    limpeza: `<svg viewBox="0 0 100 100"><g ${O} fill="#fff" stroke-width="2.5"><circle cx="82" cy="24" r="7"/><circle cx="90" cy="40" r="4.5"/><circle cx="76" cy="44" r="3.5"/></g><path d="M80 22a3 3 0 0 0-3 3" stroke="#86bfe0" stroke-width="2" fill="none" stroke-linecap="round"/><path ${O} fill="#f6d06a" d="M28 14h30l8 8h4v8h-8l-4-4H28z"/><path ${O} fill="#f6d06a" d="M34 30l-6 12h8"/><rect x="34" y="28" width="18" height="14" ${O} fill="#e3f2fb"/><path ${O} fill="#86bfe0" d="M30 42h26c6 0 10 4 10 10v30c0 6-4 10-10 10H30c-6 0-10-4-10-10V52c0-6 4-10 10-10z"/><path d="M27 56v18" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".7"/>${face(43, 68, .85)}</svg>`,
+    trabalho: `<svg viewBox="0 0 100 100"><path ${O} fill="#e9dccb" d="M6 74h88l-7 12H13z"/><rect x="16" y="20" width="68" height="54" rx="7" ${O} fill="#f7b8c6"/><rect x="23" y="27" width="54" height="40" rx="3" fill="#e3f2fb" stroke="#4a3b3f" stroke-width="2.5"/>${face(50, 46, .9)}<path d="M40 80h20" stroke="#4a3b3f" stroke-width="2.5" stroke-linecap="round"/><path ${O} fill="#f6d06a" stroke-width="2.5" d="M84 10c1.5 7 3.5 9 10 10-6.5 1-8.5 3-10 10-1.5-7-3.5-9-10-10 6.5-1 8.5-3 10-10z"/></svg>`,
+    consegue: `<svg viewBox="0 0 170 70"><path ${O} fill="#fbedc2" d="M8 12h154l-6 23 6 23H8l6-23z"/><text x="85" y="45" text-anchor="middle" font-family="Caveat, cursive" font-weight="700" font-size="32" fill="#4a3b3f">você consegue!</text></svg>`,
+    yay: `<svg viewBox="0 0 100 86"><path ${O} fill="#d9ecd9" d="M14 10h72a8 8 0 0 1 8 8v36a8 8 0 0 1-8 8H42l-16 16 2-16H14a8 8 0 0 1-8-8V18a8 8 0 0 1 8-8z"/><text x="50" y="49" text-anchor="middle" font-family="Caveat, cursive" font-weight="700" font-size="34" fill="#4a3b3f">yay!</text></svg>`,
+    feito: `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" ${O} fill="#c9bdf0"/><circle cx="50" cy="50" r="32" fill="none" stroke="#fff" stroke-width="2.5" stroke-dasharray="4 5"/><text x="50" y="59" text-anchor="middle" font-family="Caveat, cursive" font-weight="700" font-size="30" fill="#4a3b3f" transform="rotate(-10 50 50)">feito!</text></svg>`,
+    fitarosa: `<svg viewBox="0 0 180 44"><path fill="#f29aa6" opacity=".82" d="M4 4h172l-4 6 4 6-4 6 4 6-4 6 4 6H4l4-6-4-6 4-6-4-6 4-6z"/><g fill="#fff" opacity=".6"><circle cx="24" cy="22" r="5"/><circle cx="58" cy="22" r="5"/><circle cx="92" cy="22" r="5"/><circle cx="126" cy="22" r="5"/><circle cx="160" cy="22" r="5"/></g></svg>`,
+    fitaverde: `<svg viewBox="0 0 180 44"><defs><pattern id="pz" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="7" height="14" fill="#fff" opacity=".5"/></pattern></defs><path fill="#8fbf9a" opacity=".85" d="M4 4h172l-4 6 4 6-4 6 4 6-4 6 4 6H4l4-6-4-6 4-6-4-6 4-6z"/><path fill="url(#pz)" d="M4 4h172l-4 6 4 6-4 6 4 6-4 6 4 6H4l4-6-4-6 4-6-4-6 4-6z"/></svg>`,
+    fitaamarela: `<svg viewBox="0 0 180 44"><path fill="#f6d06a" opacity=".85" d="M4 4h172l-4 6 4 6-4 6 4 6-4 6 4 6H4l4-6-4-6 4-6-4-6 4-6z"/><path d="M16 22h148" stroke="#fff" stroke-width="3" stroke-dasharray="2 8" stroke-linecap="round"/></svg>`
+  };
+
+  /* ===== estado ===== */
+  let view = 'dia';
+  let cur = new Date(); cur.setHours(0, 0, 0, 0);
+  let ready = false;
+  try { const v = localStorage.getItem('planner:ui-view'); if (v) view = v; } catch (e) {}
+  const hash = location.hash.slice(1);
+  const VIEWS = ['dia', 'metas', 'humor', 'leituras', 'ideias'];
+  if (VIEWS.includes(hash)) view = hash;
+  if (!VIEWS.includes(view)) view = 'dia';
+
+  const pageKey = () => ({
+    dia: 'day_' + isoDay(cur), metas: 'habits_' + isoMonth(cur), humor: 'mood_' + isoMonth(cur),
+    leituras: 'books_' + isoMonth(cur), ideias: 'ideas'
+  })[view];
+  const viewEl = $('#view');
+
+  function syncTop() {
+    document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.v === view)));
+    $('#datePick').value = isoDay(cur);
+    $('.datebox').hidden = $('#todayBtn').hidden = view === 'ideias';
+    const unit = view === 'dia' ? 'dia' : 'mês';
+    $('#prev').setAttribute('aria-label', unit + ' anterior');
+    $('#next').setAttribute('aria-label', 'Próximo ' + unit);
+  }
+
+  let renderSeq = 0;
+  async function go() {
+    syncTop();
+    if (!ready) return;
+    const seq = ++renderSeq;
+    deselect();
+    if (view === 'dia') await renderDay(seq);
+    else if (view === 'metas') await renderHabits(seq);
+    else if (view === 'humor') await renderMood(seq);
+    else if (view === 'ideias') await renderIdeas(seq);
+    else await renderBooks(seq);
+    if (seq === renderSeq) await renderStickers(seq);
+  }
+
+  /* ===== página: meu dia ===== */
+  async function renderDay(seq) {
+    const dk = 'day_' + isoDay(cur), hk = 'habits_' + isoMonth(cur);
+    const mk = 'mood_' + isoMonth(cur);
+    const [day, hab, md] = await Promise.all([load(dk, null), load(hk, null), load(mk, null)]);
+    const curMood = md && md.days && md.days[cur.getDate()] ? md.days[cur.getDate()].m : null;
+    if (seq !== renderSeq) return;
+    const d = day ? clone(day) : { tasks: [], notes: '' };
+    const today = isoDay(new Date()) === isoDay(cur);
+    const done = d.tasks.filter(t => t.done).length;
+    viewEl.className = '';
+    viewEl.innerHTML = `
+      <div class="sheet-head">
+        <div><div class="eyebrow">${today ? 'hoje · ' : ''}${DIAS[cur.getDay()]}</div>
+        <h1><span class="hl">${cur.getDate()} de ${MESES[cur.getMonth()]}</span></h1></div>
+        <div class="status">${statusText()}</div>
+      </div>
+      <div class="day-grid">
+        <section class="card tilt-l" aria-labelledby="h-tarefas">
+          <h2 id="h-tarefas">Tarefas do dia <span class="counter">${done}/${d.tasks.length}</span></h2>
+          <ul class="tasks" id="taskList">${d.tasks.map(taskHTML).join('') || ''}</ul>
+          ${d.tasks.length ? '' : '<p class="empty" id="taskEmpty">Nenhuma tarefa ainda. Escreva a primeira aqui embaixo.</p>'}
+          <form class="add" id="addTask" autocomplete="off">
+            <input id="newTask" placeholder="Nova tarefa…" aria-label="Nova tarefa" maxlength="140">
+            <button class="btn" type="submit">Adicionar</button>
+          </form>
+          <p class="hint">Toque na tarefa quando terminar e ela ganha cor. A bolinha troca a cor.</p>
+        </section>
+        <div class="side">
+          <section class="card t-lilac tilt-r" aria-labelledby="h-humor">
+            <h2 id="h-humor">Humor do dia</h2>
+            <div class="moods" id="dayMoods">${moodButtons(curMood)}</div>
+          </section>
+          <section class="card t-sage" aria-labelledby="h-metas">
+            <h2 id="h-metas">Metas de hoje</h2>
+            <div class="chips">${HABITS.map(h => `
+              <button class="chip h-${h.k}" data-h="${h.k}" aria-pressed="${!!(hab && hab[h.k] && hab[h.k][cur.getDate()])}">${h.icon}${h.name}<span class="mini"></span></button>`).join('')}
+            </div>
+          </section>
+          <section class="card t-butter" aria-labelledby="h-notas">
+            <h2 id="h-notas">Notas</h2>
+            <textarea id="notes" aria-label="Notas do dia" placeholder="Pensamentos, recados, gratidão…">${esc(d.notes)}</textarea>
+          </section>
+        </div>
+      </div>`;
+
+    const commit = () => save(dk, clone(d));
+    const list = $('#taskList');
+    const refreshCount = () => {
+      $('.counter').textContent = `${d.tasks.filter(t => t.done).length}/${d.tasks.length}`;
+      const em = $('#taskEmpty'); if (em) em.remove();
+    };
+    $('#addTask').addEventListener('submit', e => {
+      e.preventDefault();
+      const inp = $('#newTask'); const text = inp.value.trim(); if (!text) return;
+      const t = { id: uid(), text, c: d.tasks.length % TASK_COLORS.length, done: false };
+      d.tasks.push(t); commit();
+      list.insertAdjacentHTML('beforeend', taskHTML(t)); inp.value = ''; inp.focus(); refreshCount();
+    });
+    list.addEventListener('click', e => {
+      const btn = e.target.closest('[data-act]'); if (!btn) return;
+      const li = btn.closest('.task'); const t = d.tasks.find(x => x.id === li.dataset.id); if (!t) return;
+      const act = btn.dataset.act;
+      if (act === 'toggle') {
+        t.done = !t.done; li.classList.toggle('done', t.done); btn.setAttribute('aria-pressed', String(t.done));
+        li.classList.remove('just'); void li.offsetWidth; if (t.done) li.classList.add('just');
+        if (t.done && d.tasks.every(x => x.done)) toast('Tudo feito hoje! Que orgulho.');
+      } else if (act === 'color') {
+        t.c = (t.c + 1) % TASK_COLORS.length; li.style.setProperty('--c', TASK_COLORS[t.c]);
+      } else if (act === 'del') {
+        d.tasks = d.tasks.filter(x => x !== t); li.remove();
+      } else if (act === 'edit') {
+        const label = li.querySelector('.t'); const inp = document.createElement('input');
+        inp.className = 'edit'; inp.value = t.text; inp.maxLength = 140; inp.setAttribute('aria-label', 'Editar tarefa');
+        label.replaceWith(inp); inp.focus();
+        const finish = () => { t.text = inp.value.trim() || t.text; li.outerHTML = taskHTML(t); commit(); };
+        inp.addEventListener('blur', finish, { once: true });
+        inp.addEventListener('keydown', ev => { if (ev.key === 'Enter') inp.blur(); });
+        return;
+      }
+      commit(); refreshCount();
+    });
+    let nt;
+    $('#notes').addEventListener('input', e => { d.notes = e.target.value; clearTimeout(nt); nt = setTimeout(commit, 600); });
+    viewEl.querySelectorAll('.chip').forEach(b => b.addEventListener('click', () => toggleHabit(hk, b.dataset.h, cur.getDate(), b)));
+    $('#dayMoods').addEventListener('click', async e => {
+      const b = e.target.closest('.mood'); if (!b) return;
+      const on = b.getAttribute('aria-pressed') !== 'true';
+      $('#dayMoods').querySelectorAll('.mood').forEach(x => x.setAttribute('aria-pressed', String(on && x === b)));
+      await setMood(mk, cur.getDate(), on ? b.dataset.m : null);
+    });
+  }
+
+  /* ===== página: humor ===== */
+  async function renderMood(seq) {
+    const mk = 'mood_' + isoMonth(cur);
+    const doc = clone(await load(mk, null) || { days: {} });
+    if (seq !== renderSeq) return;
+    const n = daysIn(cur), first = new Date(cur.getFullYear(), cur.getMonth(), 1).getDay();
+    const sel = cur.getDate();
+    const mon = MESES[cur.getMonth()].slice(0, 3);
+    const calHTML = () => {
+      let cells = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map(w => `<span class="wd" aria-hidden="true">${w}</span>`).join('');
+      for (let i = 0; i < first; i++) cells += '<span></span>';
+      for (let dd = 1; dd <= n; dd++) {
+        const e = doc.days[dd]; const m = e && moodOf(e.m);
+        cells += `<button data-d="${dd}" class="${m ? 'has' : ''}${dd === sel ? ' sel' : ''}" style="--mc:${m ? m.c : 'transparent'}" aria-label="Dia ${dd}${m ? ': ' + m.name : ''}">${m ? moodFace(m.k) : dd}</button>`;
+      }
+      return cells;
+    };
+    const legendHTML = () => {
+      const cnt = {}; Object.values(doc.days).forEach(e => { if (e.m) cnt[e.m] = (cnt[e.m] || 0) + 1; });
+      const parts = MOODS.filter(m => cnt[m.k]).map(m => `<span class="tag">${moodFace(m.k)}${m.name} · ${cnt[m.k]}</span>`);
+      return parts.join('') || '<span class="sub">As cores do mês aparecem aqui.</span>';
+    };
+    const listHTML = () => {
+      const days = Object.keys(doc.days).map(Number).filter(d => doc.days[d].m || doc.days[d].n).sort((a, b) => a - b);
+      if (!days.length) return '<p class="empty">Nenhum dia registrado ainda. Toque em um dia no calendário.</p>';
+      return '<ul class="mlist">' + days.map(d => {
+        const e = doc.days[d]; const m = moodOf(e.m);
+        return `<li>${m ? moodFace(m.k) : moodFace('')}<div><b>${d} ${mon} · ${m ? m.name : 'sem humor'}</b>${e.n ? `<span>${esc(e.n)}</span>` : ''}</div></li>`;
+      }).join('') + '</ul>';
+    };
+    const e0 = doc.days[sel] || {};
+    viewEl.className = '';
+    viewEl.innerHTML = `
+      <div class="sheet-head">
+        <div><div class="eyebrow">humor do dia</div><h1><span class="hl">${MESES[cur.getMonth()]}</span> ${cur.getFullYear()}</h1></div>
+        <div class="status">${statusText()}</div>
+      </div>
+      <div class="mood-grid">
+        <section class="card t-butter tilt-l">
+          <h2>Calendário do humor</h2>
+          <div class="cal mcal" id="mcal">${calHTML()}</div>
+          <div class="legend" id="mlegend">${legendHTML()}</div>
+        </section>
+        <div class="side">
+          <section class="card t-lilac tilt-r">
+            <h2>Como foi o dia ${sel}?</h2>
+            <div class="moods" id="pickMoods">${moodButtons(e0.m)}</div>
+            <input class="mnote" id="mnote" maxlength="160" placeholder="O que deixou seu dia assim?" aria-label="Anotação do humor" value="${esc(e0.n || '')}">
+          </section>
+          <section class="card t-sky">
+            <h2>Registro do mês</h2>
+            <div id="mlist">${listHTML()}</div>
+          </section>
+        </div>
+      </div>`;
+    const refresh = () => { $('#mcal').innerHTML = calHTML(); $('#mlegend').innerHTML = legendHTML(); $('#mlist').innerHTML = listHTML(); };
+    const commit = () => {
+      const e = doc.days[sel];
+      if (e && !e.m && !e.n) delete doc.days[sel];
+      save(mk, clone(doc), 400); refresh();
+    };
+    $('#mcal').addEventListener('click', e => {
+      const b = e.target.closest('button[data-d]'); if (!b) return;
+      cur = new Date(cur.getFullYear(), cur.getMonth(), Number(b.dataset.d)); go();
+    });
+    $('#pickMoods').addEventListener('click', e => {
+      const b = e.target.closest('.mood'); if (!b) return;
+      const on = b.getAttribute('aria-pressed') !== 'true';
+      $('#pickMoods').querySelectorAll('.mood').forEach(x => x.setAttribute('aria-pressed', String(on && x === b)));
+      doc.days[sel] = Object.assign({}, doc.days[sel], { m: on ? b.dataset.m : undefined });
+      if (!on) delete doc.days[sel].m;
+      commit();
+    });
+    let t;
+    $('#mnote').addEventListener('input', e => {
+      doc.days[sel] = Object.assign({}, doc.days[sel], { n: e.target.value });
+      if (!e.target.value) delete doc.days[sel].n;
+      clearTimeout(t); t = setTimeout(commit, 600);
+    });
+  }
+
+  /* ===== página: ideias ===== */
+  async function renderIdeas(seq) {
+    const data = clone(await load('ideas', null) || { list: [] });
+    if (seq !== renderSeq) return;
+    const sorted = () => data.list.slice().sort((a, b) => (b.fav - a.fav) || (b.t - a.t));
+    const noteHTML = it => {
+      const d = new Date(it.t);
+      return `<article class="note${it.fav ? ' fav' : ''}" data-id="${it.id}" style="--nc:${NOTE_COLORS[it.c] || NOTE_COLORS[0]}">
+        <textarea class="ntext" aria-label="Ideia" maxlength="600">${esc(it.text)}</textarea>
+        <footer><span class="ndate">${d.getDate()} ${MESES[d.getMonth()].slice(0, 3)}</span>
+          <button class="ic fav-btn" data-act="fav" aria-pressed="${!!it.fav}" aria-label="Favoritar ideia">${I.star}</button>
+          <button class="dot" data-act="color" aria-label="Trocar a cor do papel"></button>
+          <button class="ic" data-act="del" aria-label="Apagar ideia">${I.x}</button></footer>
+      </article>`;
+    };
+    const countTag = () => `<span class="tag">${data.list.length} ${data.list.length === 1 ? 'ideia' : 'ideias'}</span>`;
+    viewEl.className = '';
+    viewEl.innerHTML = `
+      <div class="sheet-head">
+        <div><div class="eyebrow">caderno de ideias</div><h1><span class="hl">Ideias</span> soltas</h1></div>
+        <div class="summary" id="isum">${countTag()}</div>
+      </div>
+      <form class="card t-butter idea-new" id="ideaForm" autocomplete="off">
+        <h2>Nova ideia</h2>
+        <textarea id="ideaText" maxlength="600" placeholder="Tive uma ideia…" aria-label="Nova ideia"></textarea>
+        <div class="row"><button class="btn" type="submit">Guardar ideia</button></div>
+      </form>
+      <div class="ideas" id="ideas">${data.list.length ? sorted().map(noteHTML).join('') : '<p class="empty">Suas ideias aparecem aqui como bilhetes. Escreva a primeira acima.</p>'}</div>`;
+    const grid = $('#ideas');
+    const fit = ta => { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; };
+    const redraw = () => { grid.innerHTML = sorted().map(noteHTML).join('') || '<p class="empty">Suas ideias aparecem aqui como bilhetes. Escreva a primeira acima.</p>'; grid.querySelectorAll('.ntext').forEach(fit); $('#isum').innerHTML = countTag(); };
+    const commit = (delay) => save('ideas', clone(data), delay);
+    requestAnimationFrame(() => grid.querySelectorAll('.ntext').forEach(fit));
+    $('#ideaForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const ta = $('#ideaText'); const text = ta.value.trim(); if (!text) return;
+      data.list.push({ id: uid(), text, c: data.list.length % NOTE_COLORS.length, fav: false, t: Date.now() });
+      ta.value = ''; commit(); redraw();
+    });
+    let ti;
+    grid.addEventListener('input', e => {
+      if (!e.target.classList.contains('ntext')) return;
+      const it = data.list.find(x => x.id === e.target.closest('.note').dataset.id); if (!it) return;
+      it.text = e.target.value; fit(e.target);
+      clearTimeout(ti); ti = setTimeout(() => commit(), 600);
+    });
+    grid.addEventListener('click', e => {
+      const btn = e.target.closest('[data-act]'); if (!btn) return;
+      const note = btn.closest('.note'); const it = data.list.find(x => x.id === note.dataset.id); if (!it) return;
+      const act = btn.dataset.act;
+      if (act === 'fav') { it.fav = !it.fav; commit(); redraw(); }
+      else if (act === 'color') { it.c = (it.c + 1) % NOTE_COLORS.length; note.style.setProperty('--nc', NOTE_COLORS[it.c]); commit(); }
+      else if (act === 'del') {
+        if (!btn.classList.contains('warn')) {
+          btn.classList.add('warn'); toast('Toque de novo no X para apagar a ideia.', 2200);
+          setTimeout(() => btn.isConnected && btn.classList.remove('warn'), 3500); return;
+        }
+        data.list = data.list.filter(x => x !== it); commit(); redraw();
+      }
+    });
+  }
+  function taskHTML(t) {
+    return `<li class="task${t.done ? ' done' : ''}" data-id="${t.id}" style="--c:${TASK_COLORS[t.c] || TASK_COLORS[0]}">
+      <button class="dot" data-act="color" aria-label="Trocar a cor da tarefa"></button>
+      <button class="t" data-act="toggle" aria-pressed="${t.done}"><span class="box">${I.check}</span><span class="txt">${esc(t.text)}</span></button>
+      <button class="ic" data-act="edit" aria-label="Editar tarefa">${I.pencil}</button>
+      <button class="ic" data-act="del" aria-label="Apagar tarefa">${I.x}</button>
+    </li>`;
+  }
+
+  async function toggleHabit(hk, k, dayNum, btn) {
+    const h = clone(await load(hk, null) || {});
+    h[k] = h[k] || {};
+    if (h[k][dayNum]) delete h[k][dayNum]; else h[k][dayNum] = true;
+    save(hk, h, 300);
+    const on = !!h[k][dayNum];
+    btn.setAttribute('aria-pressed', String(on));
+    return h;
+  }
+
+  /* ===== página: metas ===== */
+  async function renderHabits(seq) {
+    const hk = 'habits_' + isoMonth(cur);
+    const hab = await load(hk, null) || {};
+    if (seq !== renderSeq) return;
+    const n = daysIn(cur), first = new Date(cur.getFullYear(), cur.getMonth(), 1).getDay();
+    const now = new Date();
+    const todayNum = isoMonth(now) === isoMonth(cur) ? now.getDate() : -1;
+    const tapes = ['t-sky', '', 't-lilac', 't-sage'];
+    viewEl.className = '';
+    viewEl.innerHTML = `
+      <div class="sheet-head">
+        <div><div class="eyebrow">metas diárias</div><h1><span class="hl">${MESES[cur.getMonth()]}</span> ${cur.getFullYear()}</h1></div>
+        <div class="status">${statusText()}</div>
+      </div>
+      <p class="sub" style="margin:-8px 0 30px">Toque no dia em que você cumpriu a meta. Ele fica colorido.</p>
+      <div class="habits">${HABITS.map((h, i) => {
+        const cnt = Object.keys(hab[h.k] || {}).length;
+        let cells = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map(w => `<span class="wd" aria-hidden="true">${w}</span>`).join('');
+        for (let i2 = 0; i2 < first; i2++) cells += '<span></span>';
+        for (let dd = 1; dd <= n; dd++) cells += `<button data-d="${dd}" class="${dd === todayNum ? 'today' : ''}" aria-pressed="${!!(hab[h.k] && hab[h.k][dd])}" aria-label="${h.name}, dia ${dd}">${dd}</button>`;
+        return `<section class="card habit h-${h.k} ${tapes[i]} ${i % 2 ? 'tilt-r' : 'tilt-l'}" data-h="${h.k}">
+          <div class="habit-head"><span class="icon">${h.icon}</span><h2>${h.name}</h2><span class="n"><b>${cnt}</b>/${n} dias</span></div>
+          <div class="bar"><span style="width:${(cnt / n * 100).toFixed(1)}%"></span></div>
+          <div class="cal">${cells}</div>
+        </section>`;
+      }).join('')}</div>`;
+    viewEl.querySelectorAll('.habit').forEach(card => {
+      card.querySelector('.cal').addEventListener('click', async e => {
+        const b = e.target.closest('button[data-d]'); if (!b) return;
+        const h = await toggleHabit(hk, card.dataset.h, Number(b.dataset.d), b);
+        const cnt = Object.keys(h[card.dataset.h] || {}).length;
+        card.querySelector('.n b').textContent = cnt;
+        card.querySelector('.bar span').style.width = (cnt / n * 100).toFixed(1) + '%';
+      });
+    });
+  }
+
+  /* ===== página: leituras ===== */
+  async function renderBooks(seq) {
+    const bk = 'books_' + isoMonth(cur);
+    const data = clone(await load(bk, null) || { list: [] });
+    const covers = await Promise.all(data.list.map(b => b.cover ? load('cover_' + b.id, null) : null));
+    if (seq !== renderSeq) return;
+    viewEl.className = '';
+    const tapes = ['', 't-lilac', 't-butter', 't-sky', 't-sage'];
+    const summary = () => {
+      const rated = data.list.filter(b => b.stars > 0);
+      const avg = rated.length ? (rated.reduce((s, b) => s + b.stars, 0) / rated.length) : 0;
+      return `<span class="tag">${data.list.length} ${data.list.length === 1 ? 'livro' : 'livros'}</span>` +
+        (rated.length ? `<span class="tag">média ${avg.toFixed(1).replace('.', ',')} estrelas</span>` : '');
+    };
+    viewEl.innerHTML = `
+      <div class="sheet-head">
+        <div><div class="eyebrow">leituras do mês</div><h1><span class="hl">${MESES[cur.getMonth()]}</span> ${cur.getFullYear()}</h1></div>
+        <div class="summary" id="bsum">${summary()}</div>
+      </div>
+      <div class="books" id="books">
+        ${data.list.map((b, i) => bookHTML(b, covers[i], tapes[i % tapes.length])).join('')}
+        <button class="addbook" id="addBook"><span class="plus">+</span>Novo livro</button>
+      </div>`;
+    const commit = () => { save(bk, clone(data)); $('#bsum').innerHTML = summary(); };
+    const grid = $('#books');
+    $('#addBook').addEventListener('click', () => {
+      const b = { id: uid(), title: '', author: '', stars: 0, cover: false };
+      data.list.push(b); commit();
+      $('#addBook').insertAdjacentHTML('beforebegin', bookHTML(b, null, tapes[(data.list.length - 1) % tapes.length]));
+      grid.querySelector(`[data-id="${b.id}"] .title`).focus();
+    });
+    const find = el => { const card = el.closest('.book'); return card && [card, data.list.find(b => b.id === card.dataset.id)]; };
+    let ti;
+    grid.addEventListener('input', e => {
+      const r = find(e.target); if (!r || !r[1]) return;
+      if (e.target.classList.contains('title')) r[1].title = e.target.value;
+      if (e.target.classList.contains('author')) r[1].author = e.target.value;
+      clearTimeout(ti); ti = setTimeout(commit, 600);
+    });
+    grid.addEventListener('click', e => {
+      const r = find(e.target); if (!r || !r[1]) return;
+      const [card, b] = r;
+      const star = e.target.closest('.stars button');
+      if (star) {
+        const v = Number(star.dataset.s); b.stars = b.stars === v ? v - 1 : v;
+        card.querySelectorAll('.stars button').forEach(s => { s.classList.toggle('on', Number(s.dataset.s) <= b.stars); });
+        card.querySelector('.stars').setAttribute('aria-label', `${b.stars} de 5 estrelas`);
+        commit(); return;
+      }
+      const del = e.target.closest('.b-del');
+      if (del) {
+        if (!del.classList.contains('warn')) {
+          del.classList.add('warn'); del.textContent = 'Toque de novo para remover';
+          setTimeout(() => { if (del.isConnected) { del.classList.remove('warn'); del.textContent = 'Remover livro'; } }, 3500);
+          return;
+        }
+        data.list = data.list.filter(x => x !== b); if (b.cover) remove('cover_' + b.id);
+        card.remove(); commit();
+      }
+    });
+    grid.addEventListener('change', async e => {
+      if (!e.target.matches('input[type=file]')) return;
+      const r = find(e.target); const file = e.target.files && e.target.files[0]; if (!r || !r[1] || !file) return;
+      const [card, b] = r;
+      try {
+        const img = await compress(file);
+        save('cover_' + b.id, { img }, 0);
+        b.cover = true; commit();
+        const cv = card.querySelector('.cover');
+        cv.classList.add('has');
+        cv.innerHTML = `<img src="${img}" alt="Capa de ${esc(b.title || 'livro')}"><input type="file" accept="image/*" aria-label="Trocar capa">`;
+      } catch (err) { toast('Não consegui abrir essa imagem. Tente outra foto.'); }
+    });
+  }
+  function bookHTML(b, cover, tape) {
+    const img = cover && cover.img;
+    return `<article class="card book ${tape}" data-id="${b.id}">
+      <label class="cover${img ? ' has' : ''}">
+        ${img ? `<img src="${img}" alt="Capa de ${esc(b.title || 'livro')}">` : `<span>${I.camera}Toque para pôr a capa</span>`}
+        <input type="file" accept="image/*" aria-label="Escolher foto da capa">
+      </label>
+      <input class="f title" value="${esc(b.title)}" placeholder="Título" aria-label="Título do livro" maxlength="90">
+      <input class="f author" value="${esc(b.author)}" placeholder="Autor(a)" aria-label="Autor(a)" maxlength="80">
+      <div class="stars" role="group" aria-label="${b.stars || 0} de 5 estrelas">
+        ${[1, 2, 3, 4, 5].map(s => `<button data-s="${s}" class="${s <= b.stars ? 'on' : ''}" aria-label="${s} estrela${s > 1 ? 's' : ''}">${I.star}</button>`).join('')}
+      </div>
+      <button class="linkbtn b-del">Remover livro</button>
+    </article>`;
+  }
+  function compress(file) {
+    return new Promise((res, rej) => {
+      const fr = new FileReader();
+      fr.onerror = rej;
+      fr.onload = () => {
+        const im = new Image();
+        im.onerror = rej;
+        im.onload = () => {
+          const sc = Math.min(1, 320 / im.width);
+          const c = document.createElement('canvas');
+          c.width = Math.round(im.width * sc); c.height = Math.round(im.height * sc);
+          c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+          res(c.toDataURL('image/jpeg', 0.8));
+        };
+        im.src = fr.result;
+      };
+      fr.readAsDataURL(file);
+    });
+  }
+
+  /* ===== adesivos na página ===== */
+  const layer = $('#stickers'), sheet = $('#sheet');
+  let stk = null, stkKey = '', selId = null;
+  async function renderStickers(seq) {
+    stkKey = 'stk_' + pageKey();
+    const s = await load(stkKey, null);
+    if (seq !== renderSeq) return;
+    stk = s ? clone(s) : { items: [] };
+    drawStickers();
+  }
+  function drawStickers() {
+    layer.innerHTML = stk.items.map(it => `<div class="stk${it.id === selId ? ' sel' : ''}" data-id="${it.id}" style="left:${(it.x * 100).toFixed(3)}%;top:${it.y}px;width:${it.w}px;transform:rotate(${it.r}deg)">${STICKERS[it.s] || ''}</div>`).join('');
+    if (selId) {
+      const it = stk.items.find(i => i.id === selId);
+      if (it) {
+        const el = layer.querySelector(`[data-id="${selId}"]`);
+        const left = it.x * sheet.clientWidth + it.w / 2;
+        const top = Math.max(48, it.y - 12);
+        layer.insertAdjacentHTML('beforeend', `<div class="stk-tools" style="left:${left}px;top:${top}px">
+          <button data-t="menor" aria-label="Diminuir">−</button><button data-t="maior" aria-label="Aumentar">+</button>
+          <button data-t="girar" aria-label="Girar">${I.rot}</button><button data-t="tirar" aria-label="Tirar adesivo">${I.x}</button></div>`);
+        void el;
+      }
+    }
+  }
+  const saveStk = () => save(stkKey, clone(stk), 300);
+  function deselect() { if (selId) { selId = null; if (stk) drawStickers(); } }
+  function addSticker(name) {
+    if (!stk) return;
+    const w = /^fita/.test(name) ? 170 : (name === 'consegue' ? 170 : 96);
+    const rect = sheet.getBoundingClientRect();
+    const sw = sheet.clientWidth;
+    const y = Math.max(10, Math.min(sheet.clientHeight - w, innerHeight / 2 - rect.top - w / 2 + (Math.random() * 60 - 30)));
+    const x = Math.max(0, Math.min(1 - w / sw, 0.5 - w / 2 / sw + (Math.random() * .2 - .1)));
+    const it = { id: uid(), s: name, x, y: Math.round(y), w, r: Math.round(Math.random() * 16 - 8) };
+    stk.items.push(it); selId = it.id; drawStickers(); saveStk();
+  }
+  let drag = null;
+  layer.addEventListener('pointerdown', e => {
+    const tool = e.target.closest('.stk-tools button');
+    if (tool) {
+      e.stopPropagation();
+      const it = stk.items.find(i => i.id === selId); if (!it) return;
+      const t = tool.dataset.t;
+      if (t === 'maior') it.w = Math.min(320, Math.round(it.w * 1.18));
+      if (t === 'menor') it.w = Math.max(36, Math.round(it.w / 1.18));
+      if (t === 'girar') it.r = (it.r + 15) % 360;
+      if (t === 'tirar') { stk.items = stk.items.filter(i => i !== it); selId = null; }
+      drawStickers(); saveStk(); return;
+    }
+    const el = e.target.closest('.stk'); if (!el) return;
+    e.stopPropagation(); e.preventDefault();
+    const it = stk.items.find(i => i.id === el.dataset.id); if (!it) return;
+    if (selId !== it.id) { selId = it.id; stk.items = stk.items.filter(i => i !== it).concat(it); drawStickers(); }
+    const node = layer.querySelector(`[data-id="${it.id}"]`);
+    drag = { it, node, sx: e.clientX, sy: e.clientY, ox: it.x * sheet.clientWidth, oy: it.y, moved: false, pid: e.pointerId };
+    try { node.setPointerCapture(e.pointerId); } catch (err) {}
+    const tools = layer.querySelector('.stk-tools'); if (tools) tools.style.visibility = 'hidden';
+  });
+  layer.addEventListener('pointermove', e => {
+    if (!drag || e.pointerId !== drag.pid) return;
+    const dx = e.clientX - drag.sx, dy = e.clientY - drag.sy;
+    if (Math.abs(dx) + Math.abs(dy) > 3) drag.moved = true;
+    const sw = sheet.clientWidth;
+    const nx = Math.max(-drag.it.w / 2, Math.min(sw - drag.it.w / 2, drag.ox + dx));
+    const ny = Math.max(-20, Math.min(sheet.clientHeight - 20, drag.oy + dy));
+    drag.it.x = nx / sw; drag.it.y = Math.round(ny);
+    drag.node.style.left = (drag.it.x * 100).toFixed(3) + '%'; drag.node.style.top = drag.it.y + 'px';
+  });
+  const endDrag = e => {
+    if (!drag || e.pointerId !== drag.pid) return;
+    const moved = drag.moved; drag = null;
+    drawStickers(); if (moved) saveStk();
+  };
+  layer.addEventListener('pointerup', endDrag);
+  layer.addEventListener('pointercancel', endDrag);
+  document.addEventListener('pointerdown', e => {
+    if (!e.target.closest('.stk, .stk-tools, .tray, #stickerBtn')) deselect();
+  });
+
+  /* ===== bandeja ===== */
+  $('#trayGrid').innerHTML = Object.keys(STICKERS).map(k => `<button data-s="${k}" aria-label="Adesivo ${k}">${STICKERS[k]}</button>`).join('');
+  const openTray = open => {
+    $('#tray').hidden = !open; $('#stickerBtn').setAttribute('aria-expanded', String(open));
+    if (open) { $('#backup').hidden = true; $('#backupBtn').setAttribute('aria-expanded', 'false'); }
+  };
+  $('#stickerBtn').addEventListener('click', () => openTray($('#tray').hidden));
+  $('#trayClose').addEventListener('click', () => openTray(false));
+  $('#trayGrid').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { addSticker(b.dataset.s); toast('Adesivo colado! Arraste para posicionar.', 1800); } });
+
+  /* ===== navegação ===== */
+  document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+    view = t.dataset.v;
+    try { localStorage.setItem('planner:ui-view', view); } catch (e) {}
+    go();
+  }));
+  const step = dir => {
+    if (view === 'dia') cur = new Date(cur.getFullYear(), cur.getMonth(), cur.getDate() + dir);
+    else { const day = Math.min(cur.getDate(), daysIn(new Date(cur.getFullYear(), cur.getMonth() + dir, 1))); cur = new Date(cur.getFullYear(), cur.getMonth() + dir, day); }
+    go();
+  };
+  $('#prev').addEventListener('click', () => step(-1));
+  $('#next').addEventListener('click', () => step(1));
+  $('#todayBtn').addEventListener('click', () => { cur = new Date(); cur.setHours(0, 0, 0, 0); go(); });
+  $('#datePick').addEventListener('change', e => { if (e.target.value) { cur = parseDay(e.target.value); go(); } });
+
+  function statusText() {
+    if (mode === 'google') return 'Salvo na sua planilha do Google';
+    if (profileEmail) return 'Planner de ' + esc(profileEmail) + ' · salvo neste aparelho';
+    return mode === 'cloud' ? 'Salvo automaticamente na sua conta' : 'Salvo neste aparelho';
+  }
+
+  /* ===== backup ===== */
+  const lbKey = () => 'planner:ui-lastbackup' + (profileEmail ? ':' + profileEmail : '');
+  const bkPanel = $('#backup');
+  const fmtDate = t => { const d = new Date(t); return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`; };
+  function showLast() {
+    let t = null; try { t = Number(localStorage.getItem(lbKey())) || null; } catch (e) {}
+    $('#bkLast').textContent = t ? `Último backup feito neste aparelho: ${fmtDate(t)}.` : 'Você ainda não fez backup neste aparelho.';
+  }
+  const openBackup = open => {
+    bkPanel.hidden = !open; $('#backupBtn').setAttribute('aria-expanded', String(open));
+    if (open) { openTray(false); showLast(); $('#bkConfirm').hidden = true; }
+  };
+  $('#backupBtn').addEventListener('click', () => openBackup(bkPanel.hidden));
+  $('#bkClose').addEventListener('click', () => openBackup(false));
+
+  async function saveFile(name, text) {
+    if (window.claude && typeof window.claude.use === 'function') {
+      const dl = await window.claude.use('downloads');
+      if (!dl) throw { code: 'unavailable' };
+      await dl.save({ filename: name, data: text });
+      return;
+    }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
+    a.download = name; document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+  }
+  $('#bkSave').addEventListener('click', async () => {
+    const btn = $('#bkSave'); const label = btn.textContent; btn.disabled = true; btn.textContent = 'Preparando…';
+    try {
+      await flushAll();
+      if (store.backup) {
+        const nome = await store.backup();
+        try { localStorage.setItem(lbKey(), String(Date.now())); } catch (e) {}
+        showLast(); toast(`Cópia guardada na planilha, na aba "${nome}".`, 3500);
+        return;
+      }
+      const data = await store.all();
+      const n = Object.keys(data).length;
+      if (!n) { toast('Ainda não tem nada para guardar no backup.'); return; }
+      const json = JSON.stringify({ app: 'meu-planner', version: 1, exportedAt: new Date().toISOString(), data });
+      await saveFile(`backup-planner-${isoDay(new Date())}.json`, json);
+      try { localStorage.setItem(lbKey(), String(Date.now())); } catch (e) {}
+      showLast(); toast('Backup salvo! Guarde o arquivo num lugar seguro.');
+    } catch (err) {
+      if (err && err.code === 'declined') toast('Backup cancelado.');
+      else toast('Não consegui criar o backup agora. Tente de novo.');
+    } finally { btn.disabled = false; btn.textContent = label; }
+  });
+
+  let pending = null;
+  const KEY_OK = /^[A-Za-z0-9_.~:@+-]{1,200}$/;
+  $('#bkFile').addEventListener('change', async e => {
+    const f = e.target.files && e.target.files[0]; e.target.value = '';
+    if (!f) return;
+    try {
+      const obj = JSON.parse(await f.text());
+      if (!obj || obj.app !== 'meu-planner' || typeof obj.data !== 'object') throw 0;
+      const entries = Object.entries(obj.data).filter(([k, v]) => KEY_OK.test(k) && v && typeof v === 'object' && !Array.isArray(v));
+      if (!entries.length) throw 0;
+      pending = entries;
+      $('#bkMsg').textContent = `Backup de ${obj.exportedAt ? fmtDate(obj.exportedAt) : 'data desconhecida'} com ${entries.length} páginas. Ao restaurar, as páginas do backup substituem as mesmas páginas daqui. O resto continua como está.`;
+      $('#bkConfirm').hidden = false;
+    } catch (err) { toast('Esse arquivo não é um backup do planner.'); }
+  });
+  $('#bkCancel').addEventListener('click', () => { pending = null; $('#bkConfirm').hidden = true; });
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  async function writeRetry(k, v) {
+    for (let i = 0; i < 5; i++) {
+      try { await store.set(k, v); return; }
+      catch (err) {
+        if (!err || !['resource_exhausted', 'unavailable'].includes(err.code) || i === 4) throw err;
+        await wait(1500 * (i + 1));
+      }
+    }
+  }
+  $('#bkGo').addEventListener('click', async () => {
+    if (!pending) return;
+    const btn = $('#bkGo'); btn.disabled = true;
+    const list = pending; pending = null;
+    try {
+      await flushAll();
+      if (store.setMany) { btn.textContent = 'Restaurando…'; await store.setMany(Object.fromEntries(list)); }
+      else for (let i = 0; i < list.length; i++) {
+        btn.textContent = `Restaurando ${i + 1}/${list.length}…`;
+        await writeRetry(list[i][0], list[i][1]);
+        if (mode === 'cloud') await wait(80);
+      }
+      cache.clear(); $('#bkConfirm').hidden = true; openBackup(false); go();
+      toast('Tudo restaurado!');
+    } catch (err) {
+      toast(err && err.code === 'quota_exceeded' ? 'O espaço do planner encheu durante a restauração.' : 'A restauração parou no meio. Tente de novo com o mesmo arquivo.');
+    } finally { btn.disabled = false; btn.textContent = 'Restaurar agora'; }
+  });
+
+  /* ===== início ===== */
+  async function init() {
+    syncTop();
+    if (window.google && google.script && google.script.run) {
+      store = googleStore(); mode = 'google';
+      $('#bkSave').textContent = 'Guardar cópia na planilha';
+    } else if (window.claude && typeof window.claude.use === 'function') {
+      try {
+        const [db, user] = await Promise.all([window.claude.use('db'), window.claude.use('user')]);
+        const id = user ? await user.id().catch(() => null) : null;
+        if (db && id) { store = cloud(db, id); mode = 'cloud'; }
+      } catch (e) { /* segue no navegador */ }
+    } else {
+      if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+      let cur0 = null; try { cur0 = localStorage.getItem('planner:ui-current'); } catch (e) {}
+      if (cur0 && profiles().some(p => p.email === cur0)) enterProfile(cur0);
+      else showGate();
+      return;
+    }
+    ready = true;
+    go();
+  }
+
+  /* ===== perfis por e-mail (versão independente) ===== */
+  let profileEmail = null;
+  function profiles() {
+    try { const v = JSON.parse(localStorage.getItem('planner:ui-profiles') || '[]'); return Array.isArray(v) ? v : []; } catch (e) { return []; }
+  }
+  function saveProfiles(list) { try { localStorage.setItem('planner:ui-profiles', JSON.stringify(list)); } catch (e) {} }
+  async function pinHash(email, pin) {
+    const txt = 'meu-planner:' + email + ':' + pin;
+    if (window.crypto && crypto.subtle) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(txt));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+    let h = 0; for (const ch of txt) h = (h * 31 + ch.charCodeAt(0)) | 0; return 'h' + h;
+  }
+  function enterProfile(email) {
+    profileEmail = email;
+    try { localStorage.setItem('planner:ui-current', email); } catch (e) {}
+    store = localStore('planner:p~' + email + '~'); mode = 'local';
+    cache.clear();
+    $('.topbar').hidden = false;
+    const who = $('#whoBtn'); who.hidden = false;
+    who.querySelector('.av').textContent = email.charAt(0).toUpperCase();
+    who.setAttribute('aria-label', 'Trocar de pessoa. Agora: ' + email);
+    ready = true; go();
+  }
+  async function showGate(msg) {
+    await flushAll();
+    ready = false; profileEmail = null; renderSeq++;
+    try { localStorage.removeItem('planner:ui-current'); } catch (e) {}
+    $('.topbar').hidden = true; layer.innerHTML = ''; openTray(false); $('#backup').hidden = true;
+    const list = profiles();
+    viewEl.className = 'gate-wrap';
+    viewEl.innerHTML = `
+      <section class="card gate-card tilt-l">
+        <div class="eyebrow">boas-vindas ao</div>
+        <h1><span class="hl">Meu Planner</span></h1>
+        ${list.length ? `<h2>Quem está usando?</h2>
+          <div class="who">${list.map(p => `<button class="whob" data-e="${esc(p.email)}"><span class="av">${esc(p.email.charAt(0).toUpperCase())}</span><span class="em">${esc(p.email)}</span>${p.pin ? '<span class="lk">com PIN</span>' : ''}</button>`).join('')}</div>
+          <p class="sub">Ou entre com outro e-mail:</p>` : '<p class="sub">Entre com seu e-mail para abrir o seu planner.</p>'}
+        <form id="gateForm" class="gate-form" autocomplete="on" novalidate>
+          <label for="gEmail">Seu e-mail</label>
+          <input id="gEmail" type="email" autocomplete="email" placeholder="voce@email.com" required>
+          <label for="gPin">PIN de 4 números <span class="sub">(opcional; se já tiver, digite aqui)</span></label>
+          <input id="gPin" type="password" inputmode="numeric" maxlength="4" placeholder="••••" autocomplete="off">
+          <p class="gate-err" id="gErr" role="alert"${msg ? '' : ' hidden'}>${esc(msg || '')}</p>
+          <button class="btn" type="submit">Entrar</button>
+        </form>
+        <p class="hint">Seu planner fica guardado só neste aparelho. Quem usar outro e-mail aqui tem um planner separado.</p>
+      </section>`;
+    const err = t => { const e = $('#gErr'); e.textContent = t; e.hidden = !t; };
+    viewEl.querySelectorAll('.whob').forEach(b => b.addEventListener('click', () => {
+      const p = profiles().find(x => x.email === b.dataset.e); if (!p) return;
+      if (!p.pin) { enterProfile(p.email); return; }
+      $('#gEmail').value = p.email; $('#gPin').value = ''; err(''); $('#gPin').focus();
+    }));
+    $('#gateForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const email = $('#gEmail').value.trim().toLowerCase();
+      const pin = $('#gPin').value.trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err('Digite um e-mail válido, tipo nome@email.com.'); return; }
+      if (pin && !/^\d{4}$/.test(pin)) { err('O PIN precisa ter 4 números.'); return; }
+      const all = profiles();
+      const found = all.find(p => p.email === email);
+      if (found) {
+        if (found.pin && found.pin !== await pinHash(email, pin)) { err(pin ? 'PIN errado. Tente de novo.' : 'Esse planner tem PIN. Digite o PIN para entrar.'); return; }
+        enterProfile(email); return;
+      }
+      const first = all.length === 0;
+      all.push({ email, pin: pin ? await pinHash(email, pin) : null });
+      saveProfiles(all);
+      if (first) {
+        // leva para o primeiro perfil o que já estava salvo antes dos perfis existirem
+        const keys = []; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && isLegacyKey(k)) keys.push(k); }
+        keys.forEach(k => { try { localStorage.setItem('planner:p~' + email + '~' + k.slice(8), localStorage.getItem(k)); localStorage.removeItem(k); } catch (er) {} });
+      }
+      enterProfile(email);
+    });
+  }
+  $('#whoBtn').addEventListener('click', () => showGate());
+
+  /* ===== instalar como app (só no site independente) ===== */
+  const onOwnSite = !window.claude && !(window.google && google.script) && (location.protocol === 'https:' || location.hostname === 'localhost');
+  const installed = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+  let installPrompt = null;
+  const hintOff = () => { try { return localStorage.getItem('planner:ui-installhint') === '1'; } catch (e) { return false; } };
+  function showInstall(html, withButton) {
+    if (installed || hintOff()) return;
+    $('#installImg').src = 'icons/icon-192.png'; $('#installText').innerHTML = html; $('#installBtn').hidden = !withButton; $('#installBar').hidden = false;
+  }
+  if (onOwnSite) {
+    if ('serviceWorker' in navigator) {
+      const hadController = !!navigator.serviceWorker.controller;
+      navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(r => r.update()).catch(() => {});
+      // quando chega uma versão nova do app, recarrega uma vez para mostrar a novidade
+      let reloaded = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (hadController && !reloaded) { reloaded = true; flushAll().then(() => location.reload()); }
+      });
+    }
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault(); installPrompt = e;
+      showInstall('Coloque o Meu Planner na sua tela, como um app.', true);
+    });
+    window.addEventListener('appinstalled', () => { $('#installBar').hidden = true; installPrompt = null; toast('App instalado! O ícone já está na sua tela.'); });
+    const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (ios) showInstall('Para instalar: toque em <b>Compartilhar</b> <svg class="share-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M8 7l4-4 4 4"/><path d="M6 11H5v10h14V11h-1"/></svg> e depois em <b>Adicionar à Tela de Início</b>.', false);
+  }
+  $('#installBtn').addEventListener('click', async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    await installPrompt.userChoice.catch(() => null);
+    installPrompt = null; $('#installBar').hidden = true;
+  });
+  $('#installClose').addEventListener('click', () => {
+    $('#installBar').hidden = true;
+    try { localStorage.setItem('planner:ui-installhint', '1'); } catch (e) {}
+  });
+
+  init();
+})();
+</script>
+</body>
+</html>
