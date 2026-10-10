@@ -254,7 +254,12 @@ textarea {
 .cover.has { border: 2px solid var(--ink); padding: 0; background: var(--paper); }
 .cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .cover svg { width: 34px; height: 34px; display: block; margin: 0 auto 6px; }
-.cover input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.cover input[type=file] {
+  position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; font-size: 0; z-index: 1;
+}
+.b-urlbox { display: flex; gap: 6px; }
+.b-urlbox input { flex: 1; min-width: 0; border: 2px solid var(--ink); border-radius: 10px; padding: 6px 8px; background: var(--paper); font-size: 14px; }
+.b-urlbox button { border: 2px solid var(--ink); border-radius: 10px; background: var(--butter); font-weight: 800; padding: 0 10px; }
 .book input.f {
   width: 100%; min-width: 0; border: none; border-bottom: 2px dotted var(--line); background: transparent; padding: 4px 2px;
 }
@@ -1108,6 +1113,28 @@ a.btn, a.pill { text-decoration: none; color: var(--ink); display: inline-flex; 
         card.querySelector('.stars').setAttribute('aria-label', `${b.stars} de 5 estrelas`);
         commit(); return;
       }
+      if (e.target.closest('.b-url')) {
+        const btn = e.target.closest('.b-url');
+        btn.outerHTML = `<div class="b-urlbox"><input type="url" inputmode="url" placeholder="Cole aqui o link da imagem" aria-label="Link da imagem da capa"><button type="button" class="b-url-ok">OK</button></div>`;
+        card.querySelector('.b-urlbox input').focus();
+        return;
+      }
+      if (e.target.closest('.b-url-ok')) {
+        const url = card.querySelector('.b-urlbox input').value.trim();
+        if (!/^https:\/\/\S+$/i.test(url)) { toast('Cole um link que comece com https://'); return; }
+        const test = new Image();
+        test.onload = () => {
+          save('cover_' + b.id, { img: url }, 0);
+          b.cover = true; commit();
+          const cv = card.querySelector('.cover');
+          cv.classList.add('has');
+          cv.innerHTML = `<img src="${esc(url)}" alt="Capa de ${esc(b.title || 'livro')}"><input type="file" accept="image/*" aria-label="Trocar capa">`;
+          card.querySelector('.b-urlbox').remove();
+        };
+        test.onerror = () => toast('Esse link não abriu como imagem. Copie o endereço da imagem, não da página.');
+        test.src = url;
+        return;
+      }
       const del = e.target.closest('.b-del');
       if (del) {
         if (!del.classList.contains('warn')) {
@@ -1130,6 +1157,7 @@ a.btn, a.pill { text-decoration: none; color: var(--ink); display: inline-flex; 
         const cv = card.querySelector('.cover');
         cv.classList.add('has');
         cv.innerHTML = `<img src="${img}" alt="Capa de ${esc(b.title || 'livro')}"><input type="file" accept="image/*" aria-label="Trocar capa">`;
+        const u = card.querySelector('.b-urlbox'); if (u) u.remove();
       } catch (err) { toast('Não consegui abrir essa imagem. Tente outra foto.'); }
     });
   }
@@ -1137,9 +1165,10 @@ a.btn, a.pill { text-decoration: none; color: var(--ink); display: inline-flex; 
     const img = cover && cover.img;
     return `<article class="card book ${tape}" data-id="${b.id}">
       <label class="cover${img ? ' has' : ''}">
-        ${img ? `<img src="${img}" alt="Capa de ${esc(b.title || 'livro')}">` : `<span>${I.camera}Toque para pôr a capa</span>`}
+        ${img ? `<img src="${esc(img)}" alt="Capa de ${esc(b.title || 'livro')}">` : `<span>${I.camera}Toque para pôr a capa</span>`}
         <input type="file" accept="image/*" aria-label="Escolher foto da capa">
       </label>
+      ${mode !== 'cloud' ? `<button class="linkbtn b-url">${img ? 'Trocar por link de imagem' : 'A galeria não abriu? Usar link de uma imagem'}</button>` : ''}
       <input class="f title" value="${esc(b.title)}" placeholder="Título" aria-label="Título do livro" maxlength="90">
       <input class="f author" value="${esc(b.author)}" placeholder="Autor(a)" aria-label="Autor(a)" maxlength="80">
       <div class="stars" role="group" aria-label="${b.stars || 0} de 5 estrelas">
