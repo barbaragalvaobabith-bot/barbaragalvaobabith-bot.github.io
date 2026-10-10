@@ -177,7 +177,7 @@ h2 { font-family: var(--font-hand); font-weight: 700; font-size: 32px; line-heig
 .box svg { width: 18px; height: 18px; opacity: 0; transform: scale(.4); transition: transform .2s, opacity .2s; }
 .task.done .box svg { opacity: 1; transform: scale(1); }
 .txt { overflow-wrap: anywhere; font-weight: 600; }
-.task.done .txt { text-decoration: line-through; text-decoration-thickness: 2px; }
+.task.done .tx { text-decoration: line-through; text-decoration-thickness: 2px; }
 .dot {
   flex: none; width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--ink);
   background: var(--c); margin-left: 4px;
@@ -384,6 +384,32 @@ textarea {
 .install-bar .btn { flex: none; }
 .share-ic { display: inline-block; width: 18px; height: 18px; vertical-align: -3px; }
 
+.ttime {
+  display: flex; width: fit-content; align-items: center; gap: 3px; margin-top: 4px; font-size: 12px; font-weight: 800;
+  font-variant-numeric: tabular-nums; text-decoration: none;
+  border: 2px solid var(--ink); border-radius: 999px; padding: 0 8px 0 5px; background: var(--paper);
+}
+.ttime svg { width: 13px; height: 13px; }
+.ic.on { color: var(--accent); }
+.head-side { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+.head-side .pill svg { width: 20px; height: 20px; }
+a.btn, a.pill { text-decoration: none; color: var(--ink); display: inline-flex; align-items: center; justify-content: center; }
+.rm-grid { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px 12px; align-items: center; max-width: 360px; }
+.rm-grid label { font-weight: 800; }
+.rm-grid input, .rm-grid select, .rm-h input {
+  border: 2px solid var(--ink); border-radius: 12px; background: var(--paper); padding: 8px 10px; min-height: 44px; min-width: 0; font-weight: 700;
+}
+.rm-list { display: grid; gap: 10px; }
+.rm-h { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; border: 2px dashed var(--line); border-radius: 14px; padding: 8px 10px; }
+.rm-h .icon { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--ink); background: var(--cs); display: grid; place-items: center; flex: none; }
+.rm-h .icon svg { width: 22px; height: 22px; }
+.rm-h b { flex: 1; min-width: 90px; }
+.rm-h .pill { min-height: 44px; font-size: 14px; }
+.task { flex-wrap: wrap; }
+.task .t { flex: 1 1 180px; }
+.acts { display: flex; flex: none; margin-left: auto; }
+.txt { flex: 1; min-width: 0; }
+
 .toast {
   position: fixed; left: 50%; top: calc(16px + env(safe-area-inset-top, 0px)); transform: translateX(-50%);
   z-index: 50; background: var(--ink); color: var(--paper); padding: 10px 18px; border-radius: 999px; font-weight: 700;
@@ -492,6 +518,13 @@ textarea {
   <button class="ic" id="installClose" aria-label="Fechar aviso">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
   </button>
+</div>
+<div class="tray" id="remind" hidden>
+  <div class="tray-head">
+    <h2 id="rmTitle">Lembrete</h2>
+    <button class="pill" id="rmClose">Fechar</button>
+  </div>
+  <div class="bk" id="rmBody"></div>
 </div>
 <div class="toast" id="toast" hidden></div>
 
@@ -609,6 +642,7 @@ textarea {
     x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
     rot: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M20 4v5h-5"/></svg>',
     camera: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>',
+    bell: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/></svg>',
     star: '<svg viewBox="0 0 24 24"><path d="M12 2.8l2.8 5.8 6.3.8-4.6 4.4 1.2 6.3L12 17l-5.7 3.1 1.2-6.3L2.9 9.4l6.3-.8z"/></svg>'
   };
   const HABITS = [
@@ -793,6 +827,13 @@ textarea {
         if (t.done && d.tasks.every(x => x.done)) toast('Tudo feito hoje! Que orgulho.');
       } else if (act === 'color') {
         t.c = (t.c + 1) % TASK_COLORS.length; li.style.setProperty('--c', TASK_COLORS[t.c]);
+      } else if (act === 'bell') {
+        openRemindTask(t, new Date(cur), () => {
+          const el = list.querySelector(`[data-id="${t.id}"]`);
+          if (el) el.outerHTML = taskHTML(t);
+          commit();
+        });
+        return;
       } else if (act === 'del') {
         d.tasks = d.tasks.filter(x => x !== t); li.remove();
       } else if (act === 'edit') {
@@ -962,9 +1003,10 @@ textarea {
   function taskHTML(t) {
     return `<li class="task${t.done ? ' done' : ''}" data-id="${t.id}" style="--c:${TASK_COLORS[t.c] || TASK_COLORS[0]}">
       <button class="dot" data-act="color" aria-label="Trocar a cor da tarefa"></button>
-      <button class="t" data-act="toggle" aria-pressed="${t.done}"><span class="box">${I.check}</span><span class="txt">${esc(t.text)}</span></button>
+      <button class="t" data-act="toggle" aria-pressed="${t.done}"><span class="box">${I.check}</span><span class="txt"><span class="tx">${esc(t.text)}</span>${t.time ? `<span class="ttime">${I.bell}${esc(t.time)}</span>` : ''}</span></button>
+      <span class="acts"><button class="ic${t.time ? ' on' : ''}" data-act="bell" aria-label="Lembrete da tarefa">${I.bell}</button>
       <button class="ic" data-act="edit" aria-label="Editar tarefa">${I.pencil}</button>
-      <button class="ic" data-act="del" aria-label="Apagar tarefa">${I.x}</button>
+      <button class="ic" data-act="del" aria-label="Apagar tarefa">${I.x}</button></span>
     </li>`;
   }
 
@@ -991,7 +1033,8 @@ textarea {
     viewEl.innerHTML = `
       <div class="sheet-head">
         <div><div class="eyebrow">metas diárias</div><h1><span class="hl">${MESES[cur.getMonth()]}</span> ${cur.getFullYear()}</h1></div>
-        <div class="status">${statusText()}</div>
+        <div class="head-side"><div class="status">${statusText()}</div>
+          <button class="pill" id="habRemind">${I.bell}Lembretes diários</button></div>
       </div>
       <p class="sub" style="margin:-8px 0 30px">Toque no dia em que você cumpriu a meta. Ele fica colorido.</p>
       <div class="habits">${HABITS.map((h, i) => {
@@ -1209,8 +1252,111 @@ textarea {
   $('#trayGrid').innerHTML = Object.keys(STICKERS).map(k => `<button data-s="${k}" aria-label="Adesivo ${k}">${STICKERS[k]}</button>`).join('');
   const openTray = open => {
     $('#tray').hidden = !open; $('#stickerBtn').setAttribute('aria-expanded', String(open));
-    if (open) { $('#backup').hidden = true; $('#backupBtn').setAttribute('aria-expanded', 'false'); }
+    if (open) { $('#backup').hidden = true; $('#remind').hidden = true; $('#backupBtn').setAttribute('aria-expanded', 'false'); }
   };
+
+  /* ===== lembretes (o calendário do aparelho avisa) ===== */
+  const TZ = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { return ''; } })();
+  const at = (day, hm) => { const [h, m] = (hm || '09:00').split(':').map(Number); return new Date(day.getFullYear(), day.getMonth(), day.getDate(), h || 0, m || 0); };
+  const plus = (d, min) => new Date(d.getTime() + min * 60000);
+  const calStamp = d => `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
+  function googleLink({ title, start, end, rrule }) {
+    const u = new URL('https://calendar.google.com/calendar/render');
+    u.searchParams.set('action', 'TEMPLATE');
+    u.searchParams.set('text', title);
+    u.searchParams.set('dates', calStamp(start) + '/' + calStamp(end));
+    if (TZ) u.searchParams.set('ctz', TZ);
+    u.searchParams.set('details', 'Lembrete do Meu Planner');
+    if (rrule) u.searchParams.set('recur', 'RRULE:' + rrule);
+    return u.toString();
+  }
+  function icsText(events) {
+    const escI = s => String(s).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
+    const fold = line => line.match(/.{1,60}/gu).join('\r\n ');
+    const now = new Date();
+    const utc = `${now.getUTCFullYear()}${pad(now.getUTCMonth() + 1)}${pad(now.getUTCDate())}T${pad(now.getUTCHours())}${pad(now.getUTCMinutes())}${pad(now.getUTCSeconds())}Z`;
+    const L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Meu Planner//PT-BR', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH'];
+    events.forEach(e => {
+      L.push('BEGIN:VEVENT', `UID:${e.uid}-${now.getTime()}@meu-planner`, 'DTSTAMP:' + utc,
+        'DTSTART:' + calStamp(e.start), 'DTEND:' + calStamp(e.end), fold('SUMMARY:' + escI(e.title)));
+      if (e.rrule) L.push('RRULE:' + e.rrule);
+      L.push('BEGIN:VALARM', 'ACTION:DISPLAY', fold('DESCRIPTION:' + escI(e.title)), `TRIGGER:-PT${e.before || 0}M`, 'END:VALARM', 'END:VEVENT');
+    });
+    L.push('END:VCALENDAR');
+    return L.join('\r\n') + '\r\n';
+  }
+  const canIcs = () => mode !== 'cloud';
+  async function downloadIcs(name, events) {
+    try {
+      await saveFile(name, icsText(events), 'text/calendar');
+      toast('Abra o arquivo baixado e toque em Adicionar para colocar no calendário.', 4000);
+    } catch (e) { toast('Não consegui criar o lembrete agora. Tente pelo Google Agenda.'); }
+  }
+  function openRemind(title, html, bind) {
+    openTray(false); $('#backup').hidden = true;
+    $('#rmTitle').textContent = title; $('#rmBody').innerHTML = html; $('#remind').hidden = false;
+    bind($('#rmBody'));
+  }
+  $('#rmClose').addEventListener('click', () => { $('#remind').hidden = true; });
+  const BEFORE = [[0, 'Na hora'], [10, '10 min antes'], [30, '30 min antes'], [60, '1 hora antes']];
+  function openRemindTask(t, day, done) {
+    const before = t.before ?? 10;
+    openRemind('Lembrete da tarefa', `
+      <p><b>${esc(t.text)}</b><br><span class="sub">${day.getDate()} de ${MESES[day.getMonth()]}</span></p>
+      <div class="rm-grid">
+        <label for="rmTime">Horário</label><input type="time" id="rmTime" value="${esc(t.time || '09:00')}">
+        <label for="rmBefore">Avisar</label>
+        <select id="rmBefore">${BEFORE.map(([v, l]) => `<option value="${v}"${v === before ? ' selected' : ''}>${l}</option>`).join('')}</select>
+      </div>
+      <div class="bk-row">
+        <a class="btn" id="rmG" target="_blank" rel="noopener">Adicionar no Google Agenda</a>
+        ${canIcs() ? '<button class="pill" id="rmI">Calendário do aparelho</button>' : ''}
+      </div>
+      <p class="hint">Quem avisa é a sua agenda, mesmo com o planner fechado. No Google Agenda, o aviso segue o padrão da sua agenda; pelo calendário do aparelho, vale o "Avisar" escolhido aqui.</p>`, body => {
+      const time = () => $('#rmTime').value || '09:00';
+      const upd = () => { const s = at(day, time()); $('#rmG').href = googleLink({ title: t.text, start: s, end: plus(s, 30) }); };
+      const keep = () => { t.time = time(); t.before = Number($('#rmBefore').value); done(); };
+      upd();
+      $('#rmTime').addEventListener('change', () => { upd(); keep(); });
+      $('#rmBefore').addEventListener('change', keep);
+      $('#rmG').addEventListener('click', keep);
+      const bi = $('#rmI');
+      if (bi) bi.addEventListener('click', () => {
+        keep(); const s = at(day, t.time);
+        downloadIcs(`lembrete-${isoDay(day)}.ics`, [{ uid: t.id, title: t.text, start: s, end: plus(s, 30), before: t.before }]);
+      });
+    });
+  }
+  const HABIT_TITLES = { agua: 'Beber água', treino: 'Hora do treino', estudo: 'Hora de estudar', autocuidado: 'Momento de autocuidado' };
+  const HABIT_TIMES = { agua: '09:00', treino: '18:00', estudo: '20:00', autocuidado: '21:00' };
+  async function openRemindHabits() {
+    const st = clone(await load('settings', null) || {});
+    st.remind = st.remind || {};
+    openRemind('Lembretes diários das metas', `
+      <p class="sub">Escolha um horário para cada meta e adicione na agenda. Ela vai te lembrar todo dia.</p>
+      <div class="rm-list">${HABITS.map(h => `
+        <div class="rm-h h-${h.k}">
+          <span class="icon">${h.icon}</span>
+          <b>${h.name}</b>
+          <input type="time" data-h="${h.k}" value="${esc(st.remind[h.k] || HABIT_TIMES[h.k])}" aria-label="Horário do lembrete de ${h.name}">
+          <a class="pill" data-g="${h.k}" target="_blank" rel="noopener">Google Agenda</a>
+        </div>`).join('')}
+      </div>
+      ${canIcs() ? '<div class="bk-row"><button class="btn" id="rmAll">Todas no calendário do aparelho</button></div>' : ''}
+      <p class="hint">Os lembretes se repetem todo dia. Para parar, apague o evento na sua agenda.</p>`, body => {
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      const ev = k => { const s = at(today, body.querySelector(`input[data-h="${k}"]`).value || HABIT_TIMES[k]); return { uid: 'meta-' + k, title: HABIT_TITLES[k], start: s, end: plus(s, 15), rrule: 'FREQ=DAILY', before: 0 }; };
+      const upd = () => HABITS.forEach(h => { body.querySelector(`[data-g="${h.k}"]`).href = googleLink(ev(h.k)); });
+      upd();
+      body.addEventListener('change', e => {
+        if (!e.target.matches('input[type=time]')) return;
+        st.remind[e.target.dataset.h] = e.target.value; save('settings', clone(st)); upd();
+      });
+      const all = $('#rmAll');
+      if (all) all.addEventListener('click', () => downloadIcs('lembretes-metas.ics', HABITS.map(h => ev(h.k))));
+    });
+  }
+  document.addEventListener('click', e => { if (e.target.closest('#habRemind')) openRemindHabits(); });
   $('#stickerBtn').addEventListener('click', () => openTray($('#tray').hidden));
   $('#trayClose').addEventListener('click', () => openTray(false));
   $('#trayGrid').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { addSticker(b.dataset.s); toast('Adesivo colado! Arraste para posicionar.', 1800); } });
@@ -1252,7 +1398,7 @@ textarea {
   $('#backupBtn').addEventListener('click', () => openBackup(bkPanel.hidden));
   $('#bkClose').addEventListener('click', () => openBackup(false));
 
-  async function saveFile(name, text) {
+  async function saveFile(name, text, type = 'application/json') {
     if (window.claude && typeof window.claude.use === 'function') {
       const dl = await window.claude.use('downloads');
       if (!dl) throw { code: 'unavailable' };
@@ -1260,7 +1406,7 @@ textarea {
       return;
     }
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
+    a.href = URL.createObjectURL(new Blob([text], { type }));
     a.download = name; document.body.appendChild(a); a.click();
     setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
   }
