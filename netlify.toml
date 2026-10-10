@@ -1,0 +1,16 @@
+# Configuração para publicar no Netlify: o app fica na raiz do endereço.
+[build]
+  publish = "meu-planner"
+
+# O arquivo que atualiza o app nunca fica guardado em cache, para a versão nova chegar logo.
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "no-referrer"
+    X-Frame-Options = "DENY"
