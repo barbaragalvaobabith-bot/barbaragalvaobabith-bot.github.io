@@ -258,6 +258,8 @@ textarea {
   position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; font-size: 0; z-index: 1;
 }
 .b-urlbox { display: flex; gap: 6px; }
+.b-tip { margin: 0; font-size: 13px; line-height: 1.35; color: var(--ink-soft); }
+.b-tip b { color: var(--ink); }
 .b-urlbox input { flex: 1; min-width: 0; border: 2px solid var(--ink); border-radius: 10px; padding: 6px 8px; background: var(--paper); font-size: 14px; }
 .b-urlbox button { border: 2px solid var(--ink); border-radius: 10px; background: var(--butter); font-weight: 800; padding: 0 10px; }
 .book input.f {
@@ -1120,19 +1122,27 @@ a.btn, a.pill { text-decoration: none; color: var(--ink); display: inline-flex; 
         return;
       }
       if (e.target.closest('.b-url-ok')) {
-        const url = card.querySelector('.b-urlbox input').value.trim();
-        if (!/^https:\/\/\S+$/i.test(url)) { toast('Cole um link que comece com https://'); return; }
-        const test = new Image();
-        test.onload = () => {
-          save('cover_' + b.id, { img: url }, 0);
+        const box = card.querySelector('.b-urlbox');
+        const url = box.querySelector('input').value.trim();
+        const tip = msg => { let t = box.nextElementSibling; if (!t || !t.classList.contains('b-tip')) { box.insertAdjacentHTML('afterend', '<p class="b-tip"></p>'); t = box.nextElementSibling; } t.innerHTML = msg; };
+        if (!/^https:\/\/\S+$/i.test(url)) { tip('Cole um link que comece com <b>https://</b>'); return; }
+        if (/(^https:\/\/pin\.it\/)|pinterest\.[a-z.]+\/pin\//i.test(url)) {
+          tip('Esse é o link do <b>pin</b>, não da imagem. No app do Pinterest, abra a foto, toque nos <b>3 pontinhos → Baixar imagem</b> e depois toque na capa aqui para escolher da galeria. No navegador, toque e segure a foto e escolha <b>Copiar endereço da imagem</b>.');
+          return;
+        }
+        const ok = box.querySelector('.b-url-ok'); ok.disabled = true; ok.textContent = '…';
+        coverFromUrl(url).then(img => {
+          save('cover_' + b.id, { img }, 0);
           b.cover = true; commit();
           const cv = card.querySelector('.cover');
           cv.classList.add('has');
-          cv.innerHTML = `<img src="${esc(url)}" alt="Capa de ${esc(b.title || 'livro')}"><input type="file" accept="image/*" aria-label="Trocar capa">`;
-          card.querySelector('.b-urlbox').remove();
-        };
-        test.onerror = () => toast('Esse link não abriu como imagem. Copie o endereço da imagem, não da página.');
-        test.src = url;
+          cv.innerHTML = `<img src="${esc(img)}" alt="Capa de ${esc(b.title || 'livro')}"><input type="file" accept="image/*" aria-label="Trocar capa">`;
+          const t = box.nextElementSibling; if (t && t.classList.contains('b-tip')) t.remove();
+          box.remove();
+        }).catch(() => {
+          ok.disabled = false; ok.textContent = 'OK';
+          tip('Esse link não abriu como imagem. Copie o <b>endereço da imagem</b>, não o da página.');
+        });
         return;
       }
       const del = e.target.closest('.b-del');
@@ -1168,7 +1178,7 @@ a.btn, a.pill { text-decoration: none; color: var(--ink); display: inline-flex; 
         ${img ? `<img src="${esc(img)}" alt="Capa de ${esc(b.title || 'livro')}">` : `<span>${I.camera}Toque para pôr a capa</span>`}
         <input type="file" accept="image/*" aria-label="Escolher foto da capa">
       </label>
-      ${mode !== 'cloud' ? `<button class="linkbtn b-url">${img ? 'Trocar por link de imagem' : 'A galeria não abriu? Usar link de uma imagem'}</button>` : ''}
+      ${mode !== 'cloud' ? `<button class="linkbtn b-url">${img ? 'Trocar por link de imagem' : 'Usar imagem da internet (Pinterest, Google…)'}</button>` : ''}
       <input class="f title" value="${esc(b.title)}" placeholder="Título" aria-label="Título do livro" maxlength="90">
       <input class="f author" value="${esc(b.author)}" placeholder="Autor(a)" aria-label="Autor(a)" maxlength="80">
       <div class="stars" role="group" aria-label="${b.stars || 0} de 5 estrelas">
@@ -1177,6 +1187,22 @@ a.btn, a.pill { text-decoration: none; color: var(--ink); display: inline-flex; 
       <button class="linkbtn b-del">Remover livro</button>
     </article>`;
   }
+  function shrink(im) {
+    const sc = Math.min(1, 320 / im.width);
+    const c = document.createElement('canvas');
+    c.width = Math.round(im.width * sc); c.height = Math.round(im.height * sc);
+    c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+    return c.toDataURL('image/jpeg', 0.8);
+  }
+  // Tenta guardar uma cópia da imagem do link; se o site não deixar, guarda só o link.
+  function coverFromUrl(url) {
+    const load = cors => new Promise((res, rej) => {
+      const im = new Image();
+      if (cors) im.crossOrigin = 'anonymous';
+      im.onload = () => res(im); im.onerror = rej; im.src = url;
+    });
+    return load(true).then(im => shrink(im)).catch(() => load(false).then(() => url));
+  }
   function compress(file) {
     return new Promise((res, rej) => {
       const fr = new FileReader();
@@ -1184,13 +1210,7 @@ a.btn, a.pill { text-decoration: none; color: var(--ink); display: inline-flex; 
       fr.onload = () => {
         const im = new Image();
         im.onerror = rej;
-        im.onload = () => {
-          const sc = Math.min(1, 320 / im.width);
-          const c = document.createElement('canvas');
-          c.width = Math.round(im.width * sc); c.height = Math.round(im.height * sc);
-          c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
-          res(c.toDataURL('image/jpeg', 0.8));
-        };
+        im.onload = () => { try { res(shrink(im)); } catch (e) { rej(e); } };
         im.src = fr.result;
       };
       fr.readAsDataURL(file);
