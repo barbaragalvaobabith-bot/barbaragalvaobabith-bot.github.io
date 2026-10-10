@@ -1,2 +1,7 @@
-# barbaragalvaobabith-bot.github.io
-Meu Planner: planner digital em estilo scrapbook
+# Meu Planner
+
+Planner digital em estilo scrapbook: tarefas do dia, metas diárias, humor, leituras do mês, ideias e adesivos.
+
+Abra em: https://barbaragalvaobabith-bot.github.io
+
+Cada pessoa entra com o próprio e-mail, e as anotações ficam guardadas só no aparelho de quem usa.
