@@ -1445,7 +1445,15 @@ textarea {
     $('#installImg').src = 'icons/icon-192.png'; $('#installText').innerHTML = html; $('#installBtn').hidden = !withButton; $('#installBar').hidden = false;
   }
   if (onOwnSite) {
-    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+    if ('serviceWorker' in navigator) {
+      const hadController = !!navigator.serviceWorker.controller;
+      navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(r => r.update()).catch(() => {});
+      // quando chega uma versão nova do app, recarrega uma vez para mostrar a novidade
+      let reloaded = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (hadController && !reloaded) { reloaded = true; flushAll().then(() => location.reload()); }
+      });
+    }
     window.addEventListener('beforeinstallprompt', e => {
       e.preventDefault(); installPrompt = e;
       showInstall('Coloque o Meu Planner na sua tela, como um app.', true);
