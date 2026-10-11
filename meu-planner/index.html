@@ -257,6 +257,8 @@ textarea {
 .cover input[type=file] {
   position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; font-size: 0; z-index: 1;
 }
+.b-file { position: relative; display: inline-block; cursor: pointer; }
+.b-file input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; font-size: 0; }
 .b-urlbox { display: flex; gap: 6px; }
 .b-tip { margin: 0; font-size: 13px; line-height: 1.35; color: var(--ink-soft); }
 .b-tip b { color: var(--ink); }
@@ -1168,6 +1170,7 @@ a.btn, a.pill { text-decoration: none; color: var(--ink); display: inline-flex; 
         cv.classList.add('has');
         cv.innerHTML = `<img src="${img}" alt="Capa de ${esc(b.title || 'livro')}"><input type="file" accept="image/*" aria-label="Trocar capa">`;
         const u = card.querySelector('.b-urlbox'); if (u) u.remove();
+        const bu = card.querySelector('.b-url'); if (bu) bu.textContent = 'Trocar por link de imagem';
       } catch (err) { toast('Não consegui abrir essa imagem. Tente outra foto.'); }
     });
   }
@@ -1178,6 +1181,7 @@ a.btn, a.pill { text-decoration: none; color: var(--ink); display: inline-flex; 
         ${img ? `<img src="${esc(img)}" alt="Capa de ${esc(b.title || 'livro')}">` : `<span>${I.camera}Toque para pôr a capa</span>`}
         <input type="file" accept="image/*" aria-label="Escolher foto da capa">
       </label>
+      <span class="linkbtn b-file">Escolher de outra pasta<input type="file" aria-label="Escolher a foto da capa em outra pasta"></span>
       ${mode !== 'cloud' ? `<button class="linkbtn b-url">${img ? 'Trocar por link de imagem' : 'Usar imagem da internet (Pinterest, Google…)'}</button>` : ''}
       <input class="f title" value="${esc(b.title)}" placeholder="Título" aria-label="Título do livro" maxlength="90">
       <input class="f author" value="${esc(b.author)}" placeholder="Autor(a)" aria-label="Autor(a)" maxlength="80">
@@ -1656,6 +1660,12 @@ a.btn, a.pill { text-decoration: none; color: var(--ink); display: inline-flex; 
     window.addEventListener('appinstalled', () => { $('#installBar').hidden = true; installPrompt = null; toast('App instalado! O ícone já está na sua tela.'); });
     const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     if (ios) showInstall('Para instalar: toque em <b>Compartilhar</b> <svg class="share-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M8 7l4-4 4 4"/><path d="M6 11H5v10h14V11h-1"/></svg> e depois em <b>Adicionar à Tela de Início</b>.', false);
+  }
+  const inAppBrowser = /; wv\)|FBAN|FBAV|Instagram|WhatsApp|Line\/|TikTok|musical_ly/i.test(navigator.userAgent);
+  if (onOwnSite && inAppBrowser) {
+    $('#installImg').src = 'icons/icon-192.png';
+    $('#installText').innerHTML = 'Você abriu o planner dentro de outro app, e aqui a galeria pode não abrir. Toque nos <b>3 pontinhos (⋮)</b> e escolha <b>Abrir no Chrome</b> (ou "Abrir no navegador").';
+    $('#installBtn').hidden = true; $('#installBar').hidden = false;
   }
   $('#installBtn').addEventListener('click', async () => {
     if (!installPrompt) return;
