@@ -93,7 +93,7 @@ button { cursor: pointer; }
 .tab[data-v="dia"] { background: var(--blush-soft); }
 .tab[data-v="metas"] { background: var(--sage-soft); }
 .tab[data-v="leituras"] { background: var(--lilac-soft); }
-.tab[data-v="mdia"] { background: var(--sky-soft); }
+.tab[data-v="msem"] { background: var(--sky-soft); }
 .tab[data-v="mmes"] { background: var(--butter-soft); }
 .tab[aria-selected="true"] { transform: translateY(0); padding-bottom: 12px; }
 .tab { font-size: 21px; padding: 7px 11px 5px; }
@@ -356,7 +356,7 @@ textarea {
 .note .fav-btn svg path { fill: none; stroke: currentColor; stroke-width: 2; stroke-linejoin: round; }
 .note .warn { color: var(--paper); background: var(--accent); }
 
-/* ---------- metas do dia e do mês ---------- */
+/* ---------- metas da semana e do mês ---------- */
 .goals-card { max-width: 720px; }
 .goal-prog { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
 .goal-prog .bar { flex: 1; margin: 0; height: 14px; }
@@ -529,7 +529,7 @@ a.btn, a.pill { text-decoration: none; color: var(--ink); display: inline-flex; 
 <header class="topbar">
   <nav class="tabs" role="tablist" aria-label="Páginas do planner">
     <button class="tab" role="tab" id="tab-dia" data-v="dia">Meu dia</button>
-    <button class="tab" role="tab" id="tab-mdia" data-v="mdia">Metas do dia</button>
+    <button class="tab" role="tab" id="tab-msem" data-v="msem">Metas da semana</button>
     <button class="tab" role="tab" id="tab-mmes" data-v="mmes">Metas do mês</button>
     <button class="tab" role="tab" id="tab-metas" data-v="metas">Hábitos</button>
     <button class="tab" role="tab" id="tab-humor" data-v="humor">Humor</button>
@@ -845,13 +845,15 @@ a.btn, a.pill { text-decoration: none; color: var(--ink); display: inline-flex; 
   let ready = false;
   try { const v = localStorage.getItem('planner:ui-view'); if (v) view = v; } catch (e) {}
   const hash = location.hash.slice(1);
-  const VIEWS = ['dia', 'mdia', 'mmes', 'metas', 'humor', 'leituras', 'ideias'];
-  const BY_DAY = v => v === 'dia' || v === 'mdia';
+  const VIEWS = ['dia', 'msem', 'mmes', 'metas', 'humor', 'leituras', 'ideias'];
+  const BY_DAY = v => v === 'dia';
+  // a semana vai de domingo a sábado
+  const weekStart = d => new Date(d.getFullYear(), d.getMonth(), d.getDate() - d.getDay());
   if (VIEWS.includes(hash)) view = hash;
   if (!VIEWS.includes(view)) view = 'dia';
 
   const pageKey = () => ({
-    dia: 'day_' + isoDay(cur), mdia: 'dgoals_' + isoDay(cur), mmes: 'mgoals_' + isoMonth(cur),
+    dia: 'day_' + isoDay(cur), msem: 'wgoals_' + isoDay(weekStart(cur)), mmes: 'mgoals_' + isoMonth(cur),
     metas: 'habits_' + isoMonth(cur), humor: 'mood_' + isoMonth(cur),
     leituras: 'books_' + isoMonth(cur), ideias: 'ideas'
   })[view];
@@ -861,9 +863,9 @@ a.btn, a.pill { text-decoration: none; color: var(--ink); display: inline-flex; 
     document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.v === view)));
     $('#datePick').value = isoDay(cur);
     $('.datebox').hidden = $('#todayBtn').hidden = view === 'ideias';
-    const unit = BY_DAY(view) ? 'dia' : 'mês';
-    $('#prev').setAttribute('aria-label', unit + ' anterior');
-    $('#next').setAttribute('aria-label', 'Próximo ' + unit);
+    const unit = BY_DAY(view) ? 'dia' : view === 'msem' ? 'semana' : 'mês';
+    $('#prev').setAttribute('aria-label', (unit === 'semana' ? 'Semana' : unit.charAt(0).toUpperCase() + unit.slice(1)) + ' anterior');
+    $('#next').setAttribute('aria-label', (unit === 'semana' ? 'Próxima ' : 'Próximo ') + unit);
   }
 
   let renderSeq = 0;
@@ -875,7 +877,7 @@ a.btn, a.pill { text-decoration: none; color: var(--ink); display: inline-flex; 
     await loadHabits();
     if (seq !== renderSeq) return;
     if (view === 'dia') await renderDay(seq);
-    else if (view === 'mdia') await renderDayGoals(seq);
+    else if (view === 'msem') await renderWeekGoals(seq);
     else if (view === 'mmes') await renderMonthGoals(seq);
     else if (view === 'metas') await renderHabits(seq);
     else if (view === 'humor') await renderMood(seq);
@@ -1186,7 +1188,7 @@ a.btn, a.pill { text-decoration: none; color: var(--ink); display: inline-flex; 
     });
   }
 
-  /* ===== página: metas do dia ===== */
+  /* ===== página: metas da semana ===== */
   function goalHTML(g) {
     return `<li class="task${g.done ? ' done' : ''}" data-id="${g.id}" style="--c:${TASK_COLORS[g.c] || TASK_COLORS[0]}">
       <button class="dot" data-act="color" aria-label="Trocar a cor da meta"></button>
@@ -1195,34 +1197,38 @@ a.btn, a.pill { text-decoration: none; color: var(--ink); display: inline-flex; 
       <button class="ic" data-act="del" aria-label="Apagar meta">${I.x}</button></span>
     </li>`;
   }
-  async function renderDayGoals(seq) {
-    const key = 'dgoals_' + isoDay(cur);
-    const prevKey = 'dgoals_' + isoDay(new Date(cur.getFullYear(), cur.getMonth(), cur.getDate() - 1));
+  async function renderWeekGoals(seq) {
+    const ws = weekStart(cur), we = new Date(ws.getFullYear(), ws.getMonth(), ws.getDate() + 6);
+    const key = 'wgoals_' + isoDay(ws);
+    const prevKey = 'wgoals_' + isoDay(new Date(ws.getFullYear(), ws.getMonth(), ws.getDate() - 7));
     const [doc, prev] = await Promise.all([load(key, null), load(prevKey, null)]);
     if (seq !== renderSeq) return;
     const d = doc ? clone(doc) : { list: [] };
     const hasPrev = !!(prev && prev.list && prev.list.length);
-    const isToday = isoDay(new Date()) === isoDay(cur);
+    const isThisWeek = isoDay(weekStart(new Date())) === isoDay(ws);
+    const range = ws.getMonth() === we.getMonth()
+      ? `${ws.getDate()} a ${we.getDate()} de ${MESES[we.getMonth()]}`
+      : `${ws.getDate()} de ${MESES[ws.getMonth()]} a ${we.getDate()} de ${MESES[we.getMonth()]}`;
     const headHTML = () => {
       const n = d.list.length, k = d.list.filter(g => g.done).length;
       return `<div class="goal-prog"><div class="bar"><span style="width:${n ? Math.round(k / n * 100) : 0}%"></span></div><b>${k}/${n}</b></div>` +
-        (n && k === n ? '<p class="cheer">Dia perfeito! Todas as metas cumpridas.</p>' : '');
+        (n && k === n ? '<p class="cheer">Semana perfeita! Todas as metas cumpridas.</p>' : '');
     };
-    const emptyHTML = () => d.list.length ? '' : `<div class="empty">Nenhuma meta para este dia ainda. Escreva a primeira aqui embaixo.${hasPrev ? '<div class="bk-row" style="justify-content:center;margin-top:10px"><button class="pill" id="gCopy">Repetir as metas de ontem</button></div>' : ''}</div>`;
+    const emptyHTML = () => d.list.length ? '' : `<div class="empty">Nenhuma meta para esta semana ainda. Escreva a primeira aqui embaixo.${hasPrev ? '<div class="bk-row" style="justify-content:center;margin-top:10px"><button class="pill" id="gCopy">Repetir as metas da semana passada</button></div>' : ''}</div>`;
     viewEl.className = '';
     viewEl.innerHTML = `
       <div class="sheet-head">
-        <div><div class="eyebrow">metas do dia · ${isToday ? 'hoje · ' : ''}${DIAS[cur.getDay()]}</div>
-        <h1><span class="hl">${cur.getDate()} de ${MESES[cur.getMonth()]}</span></h1></div>
+        <div><div class="eyebrow">metas da semana${isThisWeek ? ' · esta semana' : ''}</div>
+        <h1><span class="hl">${range}</span></h1></div>
         <div class="status">${statusText()}</div>
       </div>
       <section class="card goals-card tilt-l" aria-labelledby="h-gd">
-        <h2 id="h-gd">Minhas metas do dia</h2>
+        <h2 id="h-gd">Minhas metas da semana</h2>
         <div id="gHead">${headHTML()}</div>
         <ul class="tasks" id="gList">${d.list.map(goalHTML).join('')}</ul>
         <div id="gEmpty">${emptyHTML()}</div>
         <form class="add" id="gAdd" autocomplete="off">
-          <input id="gNew" placeholder="Nova meta do dia…" aria-label="Nova meta do dia" maxlength="120">
+          <input id="gNew" placeholder="Nova meta da semana…" aria-label="Nova meta da semana" maxlength="120">
           <button class="btn" type="submit">Adicionar</button>
         </form>
         <p class="hint">Toque na meta quando cumprir e ela ganha cor. A bolinha troca a cor.</p>
@@ -1772,6 +1778,7 @@ a.btn, a.pill { text-decoration: none; color: var(--ink); display: inline-flex; 
   }));
   const step = dir => {
     if (BY_DAY(view)) cur = new Date(cur.getFullYear(), cur.getMonth(), cur.getDate() + dir);
+    else if (view === 'msem') cur = new Date(cur.getFullYear(), cur.getMonth(), cur.getDate() + 7 * dir);
     else { const day = Math.min(cur.getDate(), daysIn(new Date(cur.getFullYear(), cur.getMonth() + dir, 1))); cur = new Date(cur.getFullYear(), cur.getMonth() + dir, day); }
     go();
   };
