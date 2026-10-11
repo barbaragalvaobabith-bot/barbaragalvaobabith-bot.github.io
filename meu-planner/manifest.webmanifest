@@ -1,7 +1,7 @@
 {
   "name": "Meu Planner",
   "short_name": "Meu Planner",
-  "description": "Planner digital em estilo scrapbook: tarefas, metas, humor, leituras, ideias e adesivos.",
+  "description": "Planner digital em estilo scrapbook: tarefas, metas, hábitos, humor, leituras, ideias e adesivos.",
   "lang": "pt-BR",
   "start_url": "./",
   "scope": "./",

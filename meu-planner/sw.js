@@ -1,5 +1,5 @@
 // Guarda o app no aparelho para abrir rápido e funcionar sem internet.
-const CACHE = 'meu-planner-app-v5';
+const CACHE = 'meu-planner-app-v6';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png', './icons/favicon-48.png'];
 
 self.addEventListener('install', e => {

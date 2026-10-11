@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Planner digital em estilo scrapbook: tarefas, metas, humor, leituras, ideias e adesivos.">
+<meta name="description" content="Planner digital em estilo scrapbook: tarefas, metas, hábitos, humor, leituras, ideias e adesivos.">
 <meta name="theme-color" content="#f1e1dc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -77,14 +77,19 @@ button { cursor: pointer; }
   border-radius: 14px 14px 0 0;
   padding: 8px 18px 6px;
   background: var(--paper);
-  font-family: var(--font-hand); font-size: 26px; font-weight: 700; line-height: 1;
+  font-family: var(--font-hand); font-size: 24px; font-weight: 700; line-height: 1;
   transform: translateY(4px);
   transition: transform .15s;
 }
 .tab[data-v="dia"] { background: var(--blush-soft); }
 .tab[data-v="metas"] { background: var(--sage-soft); }
 .tab[data-v="leituras"] { background: var(--lilac-soft); }
+.tab[data-v="mdia"] { background: var(--sky-soft); }
+.tab[data-v="mmes"] { background: var(--butter-soft); }
 .tab[aria-selected="true"] { transform: translateY(0); padding-bottom: 12px; }
+.tab { font-size: 21px; padding: 7px 11px 5px; }
+.tab[aria-selected="true"] { padding-bottom: 11px; }
+.tabs { gap: 4px; flex: 1 1 100%; }
 .tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding-bottom: 8px; }
 .datebox {
   display: flex; align-items: center; gap: 2px;
@@ -342,6 +347,53 @@ textarea {
 .note .fav-btn svg path { fill: none; stroke: currentColor; stroke-width: 2; stroke-linejoin: round; }
 .note .warn { color: var(--paper); background: var(--accent); }
 
+/* ---------- metas do dia e do mês ---------- */
+.goals-card { max-width: 720px; }
+.goal-prog { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.goal-prog .bar { flex: 1; margin: 0; height: 14px; }
+.goal-prog .bar span { background: var(--accent); }
+.goal-prog b { font-variant-numeric: tabular-nums; }
+.cheer { margin: -4px 0 14px; font-family: var(--font-hand); font-size: 26px; font-weight: 700; color: var(--accent); }
+.mgoals { list-style: none; margin: 0 0 14px; padding: 0; display: grid; gap: 10px; }
+.mgoal {
+  --c: var(--blush);
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  border: 2px dashed var(--line); border-radius: 14px; padding: 8px 8px 8px 6px; background: var(--paper);
+  transition: background-color .25s, border-color .25s;
+}
+.mgoal.done { background: var(--c); border-style: solid; border-color: var(--ink); }
+.mgoal.done .tx { text-decoration: line-through; text-decoration-thickness: 2px; }
+.mgoal.done .box svg { opacity: 1; transform: scale(1); }
+.mg-main { flex: 1 1 170px; min-width: 0; display: grid; gap: 6px; font-weight: 700; overflow-wrap: anywhere; }
+.mg-prog { display: flex; align-items: center; gap: 8px; }
+.mg-prog .bar { flex: 1; margin: 0; }
+.mg-prog .bar span { background: var(--c); }
+.mgoal.done .mg-prog .bar span { background: var(--paper); }
+.mg-n { font-weight: 800; font-size: 14px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.step {
+  width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--ink); background: var(--paper);
+  font-size: 20px; font-weight: 800; display: grid; place-items: center; flex: none; padding: 0;
+}
+.box-btn { border: none; background: none; padding: 6px; flex: none; }
+.add-month { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.add-month #mNew { flex: 1 1 220px; min-width: 0; border: 2px solid var(--ink); border-radius: 12px; background: var(--paper); padding: 10px 12px; min-height: 46px; }
+.add-month label { display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 14px; }
+.add-month input[type=number] { width: 72px; border: 2px solid var(--ink); border-radius: 12px; background: var(--paper); padding: 8px; min-height: 46px; font-weight: 700; }
+
+/* ---------- editar hábitos ---------- */
+.he-list { display: grid; gap: 10px; }
+.he-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; border: 2px dashed var(--line); border-radius: 14px; padding: 8px 10px; }
+.he-ic { width: 46px; height: 46px; border-radius: 50%; border: 2px solid var(--ink); background: var(--cs); display: grid; place-items: center; flex: none; padding: 0; }
+.he-ic svg { width: 24px; height: 24px; }
+.he-name { flex: 1 1 140px; min-width: 0; border: 2px solid var(--ink); border-radius: 12px; padding: 8px 10px; background: var(--paper); font-weight: 700; min-height: 44px; }
+.he-col { width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--ink); background: var(--c); flex: none; padding: 0; }
+.he-pick { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 8px; padding-top: 4px; }
+.he-pick button { width: 46px; height: 46px; border-radius: 12px; border: 2px solid var(--line); background: var(--paper); display: grid; place-items: center; padding: 0; }
+.he-pick button svg { width: 24px; height: 24px; }
+.he-pick .sw { border-radius: 50%; border-color: var(--ink); }
+.he-pick button.on { border-color: var(--ink); box-shadow: 0 0 0 3px var(--accent); }
+.ic.warn { color: var(--paper); background: var(--accent); }
+
 /* ---------- adesivos ---------- */
 .stickers { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
 .stk {
@@ -462,7 +514,9 @@ a.btn, a.pill { text-decoration: none; color: var(--ink); display: inline-flex; 
 <header class="topbar">
   <nav class="tabs" role="tablist" aria-label="Páginas do planner">
     <button class="tab" role="tab" id="tab-dia" data-v="dia">Meu dia</button>
-    <button class="tab" role="tab" id="tab-metas" data-v="metas">Metas</button>
+    <button class="tab" role="tab" id="tab-mdia" data-v="mdia">Metas do dia</button>
+    <button class="tab" role="tab" id="tab-mmes" data-v="mmes">Metas do mês</button>
+    <button class="tab" role="tab" id="tab-metas" data-v="metas">Hábitos</button>
     <button class="tab" role="tab" id="tab-humor" data-v="humor">Humor</button>
     <button class="tab" role="tab" id="tab-leituras" data-v="leituras">Leituras</button>
     <button class="tab" role="tab" id="tab-ideias" data-v="ideias">Ideias</button>
@@ -654,12 +708,47 @@ a.btn, a.pill { text-decoration: none; color: var(--ink); display: inline-flex; 
     bell: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/></svg>',
     star: '<svg viewBox="0 0 24 24"><path d="M12 2.8l2.8 5.8 6.3.8-4.6 4.4 1.2 6.3L12 17l-5.7 3.1 1.2-6.3L2.9 9.4l6.3-.8z"/></svg>'
   };
-  const HABITS = [
-    { k: 'agua', name: 'Água', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="#4a3b3f" stroke-width="2" stroke-linejoin="round"><path d="M12 3c3 4.5 6 7.8 6 11a6 6 0 0 1-12 0c0-3.2 3-6.5 6-11z" fill="#fff"/><path d="M9.5 14.5a2.6 2.6 0 0 0 2.5 2.5" stroke-linecap="round"/></svg>' },
-    { k: 'treino', name: 'Treino', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="#4a3b3f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="9" width="3" height="6" rx="1" fill="#fff"/><rect x="18.5" y="9" width="3" height="6" rx="1" fill="#fff"/><rect x="5.5" y="7" width="3" height="10" rx="1" fill="#fff"/><rect x="15.5" y="7" width="3" height="10" rx="1" fill="#fff"/><path d="M8.5 12h7"/></svg>' },
-    { k: 'estudo', name: 'Estudo', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="#4a3b3f" stroke-width="2" stroke-linejoin="round"><path d="M3 5.5c3-1 6-1 9 1 3-2 6-2 9-1v13c-3-1-6-1-9 1-3-2-6-2-9-1z" fill="#fff"/><path d="M12 6.5v13"/></svg>' },
-    { k: 'autocuidado', name: 'Autocuidado', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="#4a3b3f" stroke-width="2" stroke-linejoin="round"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z" fill="#fff"/></svg>' }
+  const HICONS = {
+    agua: '<svg viewBox="0 0 24 24" fill="none" stroke="#4a3b3f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c3 4.5 6 7.8 6 11a6 6 0 0 1-12 0c0-3.2 3-6.5 6-11z" fill="#fff"/><path d="M9.5 14.5a2.6 2.6 0 0 0 2.5 2.5"/></svg>',
+    treino: '<svg viewBox="0 0 24 24" fill="none" stroke="#4a3b3f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="9" width="3" height="6" rx="1" fill="#fff"/><rect x="18.5" y="9" width="3" height="6" rx="1" fill="#fff"/><rect x="5.5" y="7" width="3" height="10" rx="1" fill="#fff"/><rect x="15.5" y="7" width="3" height="10" rx="1" fill="#fff"/><path d="M8.5 12h7"/></svg>',
+    estudo: '<svg viewBox="0 0 24 24" fill="none" stroke="#4a3b3f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5.5c3-1 6-1 9 1 3-2 6-2 9-1v13c-3-1-6-1-9 1-3-2-6-2-9-1z" fill="#fff"/><path d="M12 6.5v13"/></svg>',
+    autocuidado: '<svg viewBox="0 0 24 24" fill="none" stroke="#4a3b3f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z" fill="#fff"/></svg>',
+    sono: '<svg viewBox="0 0 24 24" fill="none" stroke="#4a3b3f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3.5a8.5 8.5 0 1 0 5.5 13A7 7 0 0 1 15 3.5z" fill="#fff"/><path d="M17 4h3l-3 3h3"/></svg>',
+    leitura: '<svg viewBox="0 0 24 24" fill="none" stroke="#4a3b3f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h11a1 1 0 0 1 1 1v17l-6-4-6 4V4a1 1 0 0 1 0-1z" fill="#fff"/></svg>',
+    meditacao: '<svg viewBox="0 0 24 24" fill="none" stroke="#4a3b3f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19c-4-1.5-6-5-6-9 3 .5 5 2.5 6 5 1-2.5 3-4.5 6-5 0 4-2 7.5-6 9z" fill="#fff"/><path d="M12 15c-1.5-2.5-1.5-6 0-9 1.5 3 1.5 6.5 0 9z" fill="#fff"/><path d="M4 20h16"/></svg>',
+    comida: '<svg viewBox="0 0 24 24" fill="none" stroke="#4a3b3f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7c-2-2-7-1.5-7 4 0 5 3.5 9.5 7 8.5 3.5 1 7-3.5 7-8.5 0-5.5-5-6-7-4z" fill="#fff"/><path d="M12 7c0-2 1-3.5 3-4"/></svg>',
+    remedio: '<svg viewBox="0 0 24 24" fill="none" stroke="#4a3b3f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8.5" width="18" height="7" rx="3.5" transform="rotate(-35 12 12)" fill="#fff"/><path d="M9.4 8.3l5.2 7.4"/></svg>',
+    dinheiro: '<svg viewBox="0 0 24 24" fill="none" stroke="#4a3b3f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5" fill="#fff"/><path d="M14.5 9.2c-.5-1-1.5-1.4-2.5-1.4-1.4 0-2.5.8-2.5 2s1 1.7 2.5 2 2.5.8 2.5 2-1.1 2-2.5 2c-1.1 0-2.1-.5-2.6-1.5M12 6.5v11"/></svg>',
+    caminhada: '<svg viewBox="0 0 24 24" fill="none" stroke="#4a3b3f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16c0-3 1-7 2-9h3c1 2 1 4 4 5l5 1c2 .5 2.5 2 2.5 3.5V18H4z" fill="#fff"/><path d="M4 18h16.5M9 12h3"/></svg>',
+    skincare: '<svg viewBox="0 0 24 24" fill="none" stroke="#4a3b3f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="9" width="10" height="12" rx="3" fill="#fff"/><path d="M9 9V6h6v3M10 3.5h4M10 14h4"/></svg>',
+    casa: '<svg viewBox="0 0 24 24" fill="none" stroke="#4a3b3f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-7 8 7v9H4z" fill="#fff"/><path d="M10 20v-5h4v5"/></svg>',
+    estrela: '<svg viewBox="0 0 24 24" fill="none" stroke="#4a3b3f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6-5.3-3-5.3 3 1.2-6L3.4 9.3l6-.7z" fill="#fff"/></svg>'
+  };
+  const HICON_NAMES = { agua: 'Água', treino: 'Treino', estudo: 'Estudo', autocuidado: 'Coração', sono: 'Sono', leitura: 'Leitura', meditacao: 'Meditação', comida: 'Alimentação', remedio: 'Remédio', dinheiro: 'Dinheiro', caminhada: 'Caminhada', skincare: 'Skincare', casa: 'Casa', estrela: 'Estrela' };
+  const HCOLORS = [
+    ['Rosa', '#f4a3b0', '#fde1e6'], ['Vermelho claro', '#ee8a90', '#fcdcde'], ['Coral', '#f7a58f', '#fde3db'],
+    ['Pêssego', '#f8c3a3', '#fdebe0'], ['Framboesa', '#e3779a', '#fadae5'], ['Orquídea', '#dfa0cf', '#f8e2f2'],
+    ['Lilás', '#c4abe6', '#eee5fa'], ['Céu', '#a3cde6', '#e2f1f9'], ['Menta', '#a3d3b7', '#e1f2e8'],
+    ['Azul', '#86bfe0', '#d7ecf8'], ['Rosa clássico', '#f29aa6', '#fbdde1'], ['Lavanda', '#b3a2e0', '#e6defa'], ['Verde', '#8fbf9a', '#d9ecd9']
   ];
+  const DEFAULT_HABITS = [
+    { k: 'agua', name: 'Água', icon: 'agua', color: 9 },
+    { k: 'treino', name: 'Treino', icon: 'treino', color: 10 },
+    { k: 'estudo', name: 'Estudo', icon: 'estudo', color: 11 },
+    { k: 'autocuidado', name: 'Autocuidado', icon: 'autocuidado', color: 12 }
+  ];
+  let habitCfg = DEFAULT_HABITS.map(h => ({ ...h }));
+  let HABITS = [];
+  function setHabits(list) {
+    habitCfg = (Array.isArray(list) && list.length ? list : DEFAULT_HABITS).map(h => ({ ...h }));
+    HABITS = habitCfg.map(h => {
+      const col = HCOLORS[h.color] || HCOLORS[0];
+      return { k: h.k, name: h.name, icon: HICONS[h.icon] || HICONS.estrela, c: col[1], cs: col[2] };
+    });
+  }
+  setHabits(null);
+  async function loadHabits() { const cfg = await load('habits_cfg', null); setHabits(cfg && cfg.list); }
+  const hStyle = h => `--c:${h.c};--cs:${h.cs}`;
   const TASK_COLORS = ['var(--blush)', 'var(--butter)', 'var(--sage)', 'var(--lilac)', 'var(--sky)'];
   const NOTE_COLORS = ['var(--butter-soft)', 'var(--blush-soft)', 'var(--sage-soft)', 'var(--lilac-soft)', 'var(--sky-soft)'];
 
@@ -734,12 +823,14 @@ a.btn, a.pill { text-decoration: none; color: var(--ink); display: inline-flex; 
   let ready = false;
   try { const v = localStorage.getItem('planner:ui-view'); if (v) view = v; } catch (e) {}
   const hash = location.hash.slice(1);
-  const VIEWS = ['dia', 'metas', 'humor', 'leituras', 'ideias'];
+  const VIEWS = ['dia', 'mdia', 'mmes', 'metas', 'humor', 'leituras', 'ideias'];
+  const BY_DAY = v => v === 'dia' || v === 'mdia';
   if (VIEWS.includes(hash)) view = hash;
   if (!VIEWS.includes(view)) view = 'dia';
 
   const pageKey = () => ({
-    dia: 'day_' + isoDay(cur), metas: 'habits_' + isoMonth(cur), humor: 'mood_' + isoMonth(cur),
+    dia: 'day_' + isoDay(cur), mdia: 'dgoals_' + isoDay(cur), mmes: 'mgoals_' + isoMonth(cur),
+    metas: 'habits_' + isoMonth(cur), humor: 'mood_' + isoMonth(cur),
     leituras: 'books_' + isoMonth(cur), ideias: 'ideas'
   })[view];
   const viewEl = $('#view');
@@ -748,7 +839,7 @@ a.btn, a.pill { text-decoration: none; color: var(--ink); display: inline-flex; 
     document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.v === view)));
     $('#datePick').value = isoDay(cur);
     $('.datebox').hidden = $('#todayBtn').hidden = view === 'ideias';
-    const unit = view === 'dia' ? 'dia' : 'mês';
+    const unit = BY_DAY(view) ? 'dia' : 'mês';
     $('#prev').setAttribute('aria-label', unit + ' anterior');
     $('#next').setAttribute('aria-label', 'Próximo ' + unit);
   }
@@ -759,7 +850,11 @@ a.btn, a.pill { text-decoration: none; color: var(--ink); display: inline-flex; 
     if (!ready) return;
     const seq = ++renderSeq;
     deselect();
+    await loadHabits();
+    if (seq !== renderSeq) return;
     if (view === 'dia') await renderDay(seq);
+    else if (view === 'mdia') await renderDayGoals(seq);
+    else if (view === 'mmes') await renderMonthGoals(seq);
     else if (view === 'metas') await renderHabits(seq);
     else if (view === 'humor') await renderMood(seq);
     else if (view === 'ideias') await renderIdeas(seq);
@@ -801,9 +896,9 @@ a.btn, a.pill { text-decoration: none; color: var(--ink); display: inline-flex; 
             <div class="moods" id="dayMoods">${moodButtons(curMood)}</div>
           </section>
           <section class="card t-sage" aria-labelledby="h-metas">
-            <h2 id="h-metas">Metas de hoje</h2>
+            <h2 id="h-metas">Hábitos de hoje</h2>
             <div class="chips">${HABITS.map(h => `
-              <button class="chip h-${h.k}" data-h="${h.k}" aria-pressed="${!!(hab && hab[h.k] && hab[h.k][cur.getDate()])}">${h.icon}${h.name}<span class="mini"></span></button>`).join('')}
+              <button class="chip" style="${hStyle(h)}" data-h="${h.k}" aria-pressed="${!!(hab && hab[h.k] && hab[h.k][cur.getDate()])}">${h.icon}${h.name}<span class="mini"></span></button>`).join('')}
             </div>
           </section>
           <section class="card t-butter" aria-labelledby="h-notas">
@@ -1041,17 +1136,18 @@ a.btn, a.pill { text-decoration: none; color: var(--ink); display: inline-flex; 
     viewEl.className = '';
     viewEl.innerHTML = `
       <div class="sheet-head">
-        <div><div class="eyebrow">metas diárias</div><h1><span class="hl">${MESES[cur.getMonth()]}</span> ${cur.getFullYear()}</h1></div>
+        <div><div class="eyebrow">hábitos</div><h1><span class="hl">${MESES[cur.getMonth()]}</span> ${cur.getFullYear()}</h1></div>
         <div class="head-side"><div class="status">${statusText()}</div>
-          <button class="pill" id="habRemind">${I.bell}Lembretes diários</button></div>
+          <div class="bk-row"><button class="pill" id="habEdit">${I.pencil}Editar hábitos</button>
+          <button class="pill" id="habRemind">${I.bell}Lembretes diários</button></div></div>
       </div>
-      <p class="sub" style="margin:-8px 0 30px">Toque no dia em que você cumpriu a meta. Ele fica colorido.</p>
+      <p class="sub" style="margin:-8px 0 30px">Toque no dia em que você cumpriu o hábito. Ele fica colorido.</p>
       <div class="habits">${HABITS.map((h, i) => {
         const cnt = Object.keys(hab[h.k] || {}).length;
         let cells = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map(w => `<span class="wd" aria-hidden="true">${w}</span>`).join('');
         for (let i2 = 0; i2 < first; i2++) cells += '<span></span>';
         for (let dd = 1; dd <= n; dd++) cells += `<button data-d="${dd}" class="${dd === todayNum ? 'today' : ''}" aria-pressed="${!!(hab[h.k] && hab[h.k][dd])}" aria-label="${h.name}, dia ${dd}">${dd}</button>`;
-        return `<section class="card habit h-${h.k} ${tapes[i]} ${i % 2 ? 'tilt-r' : 'tilt-l'}" data-h="${h.k}">
+        return `<section class="card habit ${tapes[i % 4]}" style="${hStyle(h)}" ${i % 2 ? 'tilt-r' : 'tilt-l'}" data-h="${h.k}">
           <div class="habit-head"><span class="icon">${h.icon}</span><h2>${h.name}</h2><span class="n"><b>${cnt}</b>/${n} dias</span></div>
           <div class="bar"><span style="width:${(cnt / n * 100).toFixed(1)}%"></span></div>
           <div class="cal">${cells}</div>
@@ -1065,6 +1161,173 @@ a.btn, a.pill { text-decoration: none; color: var(--ink); display: inline-flex; 
         card.querySelector('.n b').textContent = cnt;
         card.querySelector('.bar span').style.width = (cnt / n * 100).toFixed(1) + '%';
       });
+    });
+  }
+
+  /* ===== página: metas do dia ===== */
+  function goalHTML(g) {
+    return `<li class="task${g.done ? ' done' : ''}" data-id="${g.id}" style="--c:${TASK_COLORS[g.c] || TASK_COLORS[0]}">
+      <button class="dot" data-act="color" aria-label="Trocar a cor da meta"></button>
+      <button class="t" data-act="toggle" aria-pressed="${!!g.done}"><span class="box">${I.check}</span><span class="txt"><span class="tx">${esc(g.text)}</span></span></button>
+      <span class="acts"><button class="ic" data-act="edit" aria-label="Editar meta">${I.pencil}</button>
+      <button class="ic" data-act="del" aria-label="Apagar meta">${I.x}</button></span>
+    </li>`;
+  }
+  async function renderDayGoals(seq) {
+    const key = 'dgoals_' + isoDay(cur);
+    const prevKey = 'dgoals_' + isoDay(new Date(cur.getFullYear(), cur.getMonth(), cur.getDate() - 1));
+    const [doc, prev] = await Promise.all([load(key, null), load(prevKey, null)]);
+    if (seq !== renderSeq) return;
+    const d = doc ? clone(doc) : { list: [] };
+    const hasPrev = !!(prev && prev.list && prev.list.length);
+    const isToday = isoDay(new Date()) === isoDay(cur);
+    const headHTML = () => {
+      const n = d.list.length, k = d.list.filter(g => g.done).length;
+      return `<div class="goal-prog"><div class="bar"><span style="width:${n ? Math.round(k / n * 100) : 0}%"></span></div><b>${k}/${n}</b></div>` +
+        (n && k === n ? '<p class="cheer">Dia perfeito! Todas as metas cumpridas.</p>' : '');
+    };
+    const emptyHTML = () => d.list.length ? '' : `<div class="empty">Nenhuma meta para este dia ainda. Escreva a primeira aqui embaixo.${hasPrev ? '<div class="bk-row" style="justify-content:center;margin-top:10px"><button class="pill" id="gCopy">Repetir as metas de ontem</button></div>' : ''}</div>`;
+    viewEl.className = '';
+    viewEl.innerHTML = `
+      <div class="sheet-head">
+        <div><div class="eyebrow">metas do dia · ${isToday ? 'hoje · ' : ''}${DIAS[cur.getDay()]}</div>
+        <h1><span class="hl">${cur.getDate()} de ${MESES[cur.getMonth()]}</span></h1></div>
+        <div class="status">${statusText()}</div>
+      </div>
+      <section class="card goals-card tilt-l" aria-labelledby="h-gd">
+        <h2 id="h-gd">Minhas metas do dia</h2>
+        <div id="gHead">${headHTML()}</div>
+        <ul class="tasks" id="gList">${d.list.map(goalHTML).join('')}</ul>
+        <div id="gEmpty">${emptyHTML()}</div>
+        <form class="add" id="gAdd" autocomplete="off">
+          <input id="gNew" placeholder="Nova meta do dia…" aria-label="Nova meta do dia" maxlength="120">
+          <button class="btn" type="submit">Adicionar</button>
+        </form>
+        <p class="hint">Toque na meta quando cumprir e ela ganha cor. A bolinha troca a cor.</p>
+      </section>`;
+    const list = $('#gList');
+    const refresh = () => { $('#gHead').innerHTML = headHTML(); $('#gEmpty').innerHTML = emptyHTML(); };
+    const commit = () => save(key, clone(d));
+    $('#gAdd').addEventListener('submit', e => {
+      e.preventDefault();
+      const inp = $('#gNew'); const text = inp.value.trim(); if (!text) return;
+      const g = { id: uid(), text, c: d.list.length % TASK_COLORS.length, done: false };
+      d.list.push(g); commit(); list.insertAdjacentHTML('beforeend', goalHTML(g)); inp.value = ''; inp.focus(); refresh();
+    });
+    $('#gEmpty').addEventListener('click', e => {
+      if (!e.target.closest('#gCopy')) return;
+      d.list = prev.list.map(g => ({ id: uid(), text: g.text, c: g.c || 0, done: false }));
+      commit(); list.innerHTML = d.list.map(goalHTML).join(''); refresh();
+    });
+    list.addEventListener('click', e => {
+      const btn = e.target.closest('[data-act]'); if (!btn) return;
+      const li = btn.closest('.task'); const g = d.list.find(x => x.id === li.dataset.id); if (!g) return;
+      const act = btn.dataset.act;
+      if (act === 'toggle') {
+        g.done = !g.done; li.classList.toggle('done', g.done); btn.setAttribute('aria-pressed', String(g.done));
+        li.classList.remove('just'); void li.offsetWidth; if (g.done) li.classList.add('just');
+      } else if (act === 'color') {
+        g.c = ((g.c || 0) + 1) % TASK_COLORS.length; li.style.setProperty('--c', TASK_COLORS[g.c]);
+      } else if (act === 'del') {
+        d.list = d.list.filter(x => x !== g); li.remove();
+      } else if (act === 'edit') {
+        const label = li.querySelector('.t'); const inp = document.createElement('input');
+        inp.className = 'edit'; inp.value = g.text; inp.maxLength = 120; inp.setAttribute('aria-label', 'Editar meta');
+        label.replaceWith(inp); inp.focus();
+        inp.addEventListener('blur', () => { g.text = inp.value.trim() || g.text; li.outerHTML = goalHTML(g); commit(); }, { once: true });
+        inp.addEventListener('keydown', ev => { if (ev.key === 'Enter') inp.blur(); });
+        return;
+      }
+      commit(); refresh();
+    });
+  }
+
+  /* ===== página: metas do mês ===== */
+  function mgoalHTML(g) {
+    const target = Math.max(1, g.target || 1), n = Math.min(g.n || 0, target), done = n >= target;
+    const ctrl = target > 1
+      ? `<button class="step" data-act="minus" aria-label="Diminuir o progresso">−</button><button class="step" data-act="plus" aria-label="Aumentar o progresso">+</button>`
+      : `<button class="box-btn" data-act="toggle" aria-pressed="${done}" aria-label="Marcar como cumprida"><span class="box">${I.check}</span></button>`;
+    return `<li class="mgoal${done ? ' done' : ''}" data-id="${g.id}" style="--c:${TASK_COLORS[g.c] || TASK_COLORS[0]}">
+      <button class="dot" data-act="color" aria-label="Trocar a cor da meta"></button>
+      <div class="mg-main"><span class="tx">${esc(g.text)}</span>
+        ${target > 1 ? `<div class="mg-prog"><div class="bar"><span style="width:${Math.round(n / target * 100)}%"></span></div><span class="mg-n">${n}/${target}</span></div>` : ''}
+      </div>
+      ${ctrl}
+      <span class="acts"><button class="ic" data-act="edit" aria-label="Editar meta">${I.pencil}</button>
+      <button class="ic" data-act="del" aria-label="Apagar meta">${I.x}</button></span>
+    </li>`;
+  }
+  async function renderMonthGoals(seq) {
+    const key = 'mgoals_' + isoMonth(cur);
+    const doc = await load(key, null);
+    if (seq !== renderSeq) return;
+    const d = doc ? clone(doc) : { list: [] };
+    const isDone = g => (g.n || 0) >= Math.max(1, g.target || 1);
+    const sumHTML = () => {
+      const n = d.list.length, k = d.list.filter(isDone).length;
+      return `<span class="tag">${k} de ${n} ${n === 1 ? 'meta concluída' : 'metas concluídas'}</span>`;
+    };
+    const headHTML = () => {
+      const n = d.list.length, k = d.list.filter(isDone).length;
+      return `<div class="goal-prog"><div class="bar"><span style="width:${n ? Math.round(k / n * 100) : 0}%"></span></div><b>${k}/${n}</b></div>` +
+        (n && k === n ? '<p class="cheer">Mês incrível! Todas as metas cumpridas.</p>' : '');
+    };
+    const emptyHTML = () => d.list.length ? '' : '<p class="empty">Nenhuma meta para este mês ainda. Escreva a primeira aqui embaixo, como "Ler 3 livros" ou "Juntar R$ 200".</p>';
+    viewEl.className = '';
+    viewEl.innerHTML = `
+      <div class="sheet-head">
+        <div><div class="eyebrow">metas do mês</div><h1><span class="hl">${MESES[cur.getMonth()]}</span> ${cur.getFullYear()}</h1></div>
+        <div class="summary" id="mSum">${sumHTML()}</div>
+      </div>
+      <section class="card goals-card t-butter tilt-l" aria-labelledby="h-gm">
+        <h2 id="h-gm">Minhas metas do mês</h2>
+        <div id="mHead">${headHTML()}</div>
+        <ul class="mgoals" id="mList">${d.list.map(mgoalHTML).join('')}</ul>
+        <div id="mEmpty">${emptyHTML()}</div>
+        <form class="add-month" id="mAdd" autocomplete="off">
+          <input id="mNew" placeholder="Nova meta do mês…" aria-label="Nova meta do mês" maxlength="120">
+          <label for="mTimes">Quantas vezes?<input id="mTimes" type="number" inputmode="numeric" min="1" max="999" value="1"></label>
+          <button class="btn" type="submit">Adicionar</button>
+        </form>
+        <p class="hint">Para metas com número (ler 3 livros, treinar 12 vezes), coloque quantas vezes e use o + e o − para marcar o progresso.</p>
+      </section>`;
+    const list = $('#mList');
+    const refresh = () => { $('#mHead').innerHTML = headHTML(); $('#mEmpty').innerHTML = emptyHTML(); $('#mSum').innerHTML = sumHTML(); };
+    const commit = () => save(key, clone(d));
+    $('#mAdd').addEventListener('submit', e => {
+      e.preventDefault();
+      const inp = $('#mNew'); const text = inp.value.trim(); if (!text) return;
+      const target = Math.min(999, Math.max(1, parseInt($('#mTimes').value, 10) || 1));
+      const g = { id: uid(), text, target, n: 0, c: d.list.length % TASK_COLORS.length };
+      d.list.push(g); commit(); list.insertAdjacentHTML('beforeend', mgoalHTML(g));
+      inp.value = ''; $('#mTimes').value = '1'; inp.focus(); refresh();
+    });
+    list.addEventListener('click', e => {
+      const btn = e.target.closest('[data-act]'); if (!btn) return;
+      const li = btn.closest('.mgoal'); const g = d.list.find(x => x.id === li.dataset.id); if (!g) return;
+      const target = Math.max(1, g.target || 1);
+      const act = btn.dataset.act;
+      const redraw = () => { li.outerHTML = mgoalHTML(g); };
+      if (act === 'toggle') { g.n = (g.n || 0) >= 1 ? 0 : 1; redraw(); }
+      else if (act === 'plus') { const was = isDone(g); g.n = Math.min(target, (g.n || 0) + 1); redraw(); if (!was && isDone(g)) toast('Meta cumprida! Parabéns!'); }
+      else if (act === 'minus') { g.n = Math.max(0, (g.n || 0) - 1); redraw(); }
+      else if (act === 'color') { g.c = ((g.c || 0) + 1) % TASK_COLORS.length; li.style.setProperty('--c', TASK_COLORS[g.c]); }
+      else if (act === 'del') {
+        if (!btn.classList.contains('warn')) {
+          btn.classList.add('warn'); toast('Toque de novo no X para apagar a meta.', 2200);
+          setTimeout(() => btn.isConnected && btn.classList.remove('warn'), 3500); return;
+        }
+        d.list = d.list.filter(x => x !== g); li.remove();
+      } else if (act === 'edit') {
+        const span = li.querySelector('.tx'); const inp = document.createElement('input');
+        inp.className = 'edit'; inp.value = g.text; inp.maxLength = 120; inp.setAttribute('aria-label', 'Editar meta');
+        span.replaceWith(inp); inp.focus();
+        inp.addEventListener('blur', () => { g.text = inp.value.trim() || g.text; redraw(); commit(); }, { once: true });
+        inp.addEventListener('keydown', ev => { if (ev.key === 'Enter') inp.blur(); });
+        return;
+      }
+      commit(); refresh();
     });
   }
 
@@ -1385,20 +1648,20 @@ a.btn, a.pill { text-decoration: none; color: var(--ink); display: inline-flex; 
   async function openRemindHabits() {
     const st = clone(await load('settings', null) || {});
     st.remind = st.remind || {};
-    openRemind('Lembretes diários das metas', `
-      <p class="sub">Escolha um horário para cada meta e adicione na agenda. Ela vai te lembrar todo dia.</p>
+    openRemind('Lembretes diários dos hábitos', `
+      <p class="sub">Escolha um horário para cada hábito e adicione na agenda. Ela vai te lembrar todo dia.</p>
       <div class="rm-list">${HABITS.map(h => `
-        <div class="rm-h h-${h.k}">
+        <div class="rm-h" style="${hStyle(h)}">
           <span class="icon">${h.icon}</span>
           <b>${h.name}</b>
-          <input type="time" data-h="${h.k}" value="${esc(st.remind[h.k] || HABIT_TIMES[h.k])}" aria-label="Horário do lembrete de ${h.name}">
+          <input type="time" data-h="${h.k}" value="${esc(st.remind[h.k] || HABIT_TIMES[h.k] || '09:00')}" aria-label="Horário do lembrete de ${h.name}">
           <a class="pill" data-g="${h.k}" target="_blank" rel="noopener">Google Agenda</a>
         </div>`).join('')}
       </div>
       ${canIcs() ? '<div class="bk-row"><button class="btn" id="rmAll">Todas no calendário do aparelho</button></div>' : ''}
       <p class="hint">Os lembretes se repetem todo dia. Para parar, apague o evento na sua agenda.</p>`, body => {
       const today = new Date(); today.setHours(0, 0, 0, 0);
-      const ev = k => { const s = at(today, body.querySelector(`input[data-h="${k}"]`).value || HABIT_TIMES[k]); return { uid: 'meta-' + k, title: HABIT_TITLES[k], start: s, end: plus(s, 15), rrule: 'FREQ=DAILY', before: 0 }; };
+      const ev = k => { const h = HABITS.find(x => x.k === k); const s = at(today, body.querySelector(`input[data-h="${k}"]`).value || HABIT_TIMES[k] || '09:00'); return { uid: 'meta-' + k, title: HABIT_TITLES[k] || (h ? h.name : 'Hábito'), start: s, end: plus(s, 15), rrule: 'FREQ=DAILY', before: 0 }; };
       const upd = () => HABITS.forEach(h => { body.querySelector(`[data-g="${h.k}"]`).href = googleLink(ev(h.k)); });
       upd();
       body.addEventListener('change', e => {
@@ -1406,10 +1669,75 @@ a.btn, a.pill { text-decoration: none; color: var(--ink); display: inline-flex; 
         st.remind[e.target.dataset.h] = e.target.value; save('settings', clone(st)); upd();
       });
       const all = $('#rmAll');
-      if (all) all.addEventListener('click', () => downloadIcs('lembretes-metas.ics', HABITS.map(h => ev(h.k))));
+      if (all) all.addEventListener('click', () => downloadIcs('lembretes-habitos.ics', HABITS.map(h => ev(h.k))));
     });
   }
   document.addEventListener('click', e => { if (e.target.closest('#habRemind')) openRemindHabits(); });
+  /* ===== editar hábitos ===== */
+  function openHabitEditor() {
+    const list = habitCfg.map(h => ({ ...h }));
+    let t;
+    const persist = (delay = 0) => {
+      clearTimeout(t);
+      t = setTimeout(() => { save('habits_cfg', { list: clone(list) }); setHabits(list); go(); }, delay);
+    };
+    const col = h => HCOLORS[h.color] || HCOLORS[0];
+    const rowHTML = (h, i) => `<div class="he-row" data-i="${i}" style="--c:${col(h)[1]};--cs:${col(h)[2]}">
+        <button class="he-ic" data-act="icon" aria-label="Trocar o ícone de ${esc(h.name)}">${HICONS[h.icon] || HICONS.estrela}</button>
+        <input class="he-name" value="${esc(h.name)}" maxlength="22" aria-label="Nome do hábito">
+        <button class="he-col" data-act="color" aria-label="Trocar a cor de ${esc(h.name)}"></button>
+        <button class="ic" data-act="del" aria-label="Apagar ${esc(h.name)}">${I.x}</button>
+        <div class="he-pick" hidden></div>
+      </div>`;
+    openRemind('Editar hábitos', `
+      <p class="sub">Mude o nome, o ícone e a cor de cada hábito, apague os que não usa ou crie novos (até 8).</p>
+      <div class="he-list" id="heList"></div>
+      <div class="bk-row"><button class="btn" id="heAdd">+ Novo hábito</button></div>
+      <p class="hint">Os dias já marcados continuam salvos. Se você apagar um hábito, as marcações dele saem da tela.</p>`, body => {
+      const draw = () => { $('#heList').innerHTML = list.map(rowHTML).join(''); $('#heAdd').disabled = list.length >= 8; };
+      draw();
+      body.addEventListener('input', e => {
+        const inp = e.target.closest('.he-name'); if (!inp) return;
+        list[Number(inp.closest('.he-row').dataset.i)].name = inp.value.trim() || 'Hábito';
+        persist(600);
+      });
+      body.addEventListener('click', e => {
+        if (e.target.closest('#heAdd')) {
+          if (list.length >= 8) return;
+          list.push({ k: 'h' + uid(), name: 'Novo hábito', icon: 'estrela', color: list.length % HCOLORS.length });
+          persist(); draw();
+          const inp = body.querySelectorAll('.he-name'); const last = inp[inp.length - 1]; last.focus(); last.select();
+          return;
+        }
+        const row = e.target.closest('.he-row'); if (!row) return;
+        const i = Number(row.dataset.i), h = list[i];
+        const pickIcon = e.target.closest('[data-pick-icon]'), pickColor = e.target.closest('[data-pick-color]');
+        if (pickIcon) { h.icon = pickIcon.dataset.pickIcon; persist(); draw(); return; }
+        if (pickColor) { h.color = Number(pickColor.dataset.pickColor); persist(); draw(); return; }
+        const b = e.target.closest('[data-act]'); if (!b) return;
+        const pick = row.querySelector('.he-pick');
+        if (b.dataset.act === 'icon' || b.dataset.act === 'color') {
+          const same = !pick.hidden && pick.dataset.kind === b.dataset.act;
+          body.querySelectorAll('.he-pick').forEach(x => { x.hidden = true; });
+          if (same) return;
+          pick.dataset.kind = b.dataset.act;
+          pick.innerHTML = b.dataset.act === 'icon'
+            ? Object.keys(HICONS).map(k => `<button data-pick-icon="${k}" class="${k === h.icon ? 'on' : ''}" aria-label="${HICON_NAMES[k] || k}">${HICONS[k]}</button>`).join('')
+            : HCOLORS.map((c, ci) => `<button data-pick-color="${ci}" class="sw${ci === h.color ? ' on' : ''}" style="background:${c[1]}" aria-label="${c[0]}"></button>`).join('');
+          pick.hidden = false;
+        } else if (b.dataset.act === 'del') {
+          if (list.length <= 1) { toast('Deixe pelo menos um hábito.'); return; }
+          if (!b.classList.contains('warn')) {
+            b.classList.add('warn'); toast('Toque de novo no X para apagar o hábito.', 2200);
+            setTimeout(() => b.isConnected && b.classList.remove('warn'), 3500); return;
+          }
+          list.splice(i, 1); persist(); draw();
+        }
+      });
+    });
+  }
+  document.addEventListener('click', e => { if (e.target.closest('#habEdit')) openHabitEditor(); });
+
   $('#stickerBtn').addEventListener('click', () => openTray($('#tray').hidden));
   $('#trayClose').addEventListener('click', () => openTray(false));
   $('#trayGrid').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { addSticker(b.dataset.s); toast('Adesivo colado! Arraste para posicionar.', 1800); } });
@@ -1421,7 +1749,7 @@ a.btn, a.pill { text-decoration: none; color: var(--ink); display: inline-flex; 
     go();
   }));
   const step = dir => {
-    if (view === 'dia') cur = new Date(cur.getFullYear(), cur.getMonth(), cur.getDate() + dir);
+    if (BY_DAY(view)) cur = new Date(cur.getFullYear(), cur.getMonth(), cur.getDate() + dir);
     else { const day = Math.min(cur.getDate(), daysIn(new Date(cur.getFullYear(), cur.getMonth() + dir, 1))); cur = new Date(cur.getFullYear(), cur.getMonth() + dir, day); }
     go();
   };
