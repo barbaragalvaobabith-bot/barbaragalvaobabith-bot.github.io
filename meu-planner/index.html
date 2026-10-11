@@ -15,10 +15,11 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="Meu Planner">
 <meta property="og:description" content="Seu planner fofinho de tarefas, metas, hábitos, humor, leituras e ideias, no celular e no tablet.">
-<meta property="og:image" content="https://barbaragalvaobabith-bot.github.io/meu-planner/icons/og-card.png">
+<meta property="og:image" content="https://plannercito.netlify.app/icons/og-card.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="pt_BR">
+<meta property="og:url" content="https://plannercito.netlify.app/">
 <meta name="twitter:card" content="summary_large_image">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Meu Planner Scrapbook</title>
@@ -442,6 +443,12 @@ textarea {
 .vh { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
 .bk-confirm { border: 2px dashed var(--ink); border-radius: 14px; padding: 12px 14px; display: grid; gap: 10px; background: var(--butter-soft); }
 
+.move-bar {
+  max-width: 1040px; margin: 4px auto 14px; display: grid; gap: 10px;
+  background: var(--paper); border: 2px solid var(--ink); border-radius: 16px; padding: 12px 14px;
+  box-shadow: 4px 6px 0 rgba(74, 59, 63, .14);
+}
+.move-bar p { margin: 0; font-size: 15px; line-height: 1.4; }
 .install-bar {
   position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 45;
   width: min(560px, calc(100% - 32px)); display: flex; align-items: center; gap: 12px;
@@ -548,6 +555,13 @@ a.btn, a.pill { text-decoration: none; color: var(--ink); display: inline-flex; 
   </div>
 </header>
 
+<div class="move-bar" id="moveBar" role="region" aria-label="O planner mudou de endereço" hidden>
+  <p><b>O planner mudou para plannercito.netlify.app</b><br>Para levar suas anotações: baixe o backup aqui, abra o Plannercito, entre com o mesmo e-mail e toque em <b>Backup → Restaurar de um arquivo</b>.</p>
+  <div class="bk-row">
+    <button class="btn" id="moveBackup">1. Baixar backup</button>
+    <a class="pill" href="https://plannercito.netlify.app" target="_blank" rel="noopener">2. Abrir o Plannercito</a>
+  </div>
+</div>
 <main class="sheet" id="sheet">
   <div class="loading" id="view">Abrindo seu planner…</div>
   <div class="stickers" id="stickers"></div>
@@ -1975,8 +1989,16 @@ a.btn, a.pill { text-decoration: none; color: var(--ink); display: inline-flex; 
   const installed = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
   let installPrompt = null;
   const hintOff = () => { try { return localStorage.getItem('planner:ui-installhint') === '1'; } catch (e) { return false; } };
+  const onOldSite = /\.github\.io$/i.test(location.hostname);
+  if (onOldSite) {
+    $('#moveBar').hidden = false;
+    $('#moveBackup').addEventListener('click', () => {
+      if (!profileEmail) { toast('Entre com seu e-mail primeiro, para baixar o backup do seu planner.', 3500); return; }
+      $('#bkSave').click();
+    });
+  }
   function showInstall(html, withButton) {
-    if (installed || hintOff()) return;
+    if (installed || hintOff() || onOldSite) return;
     $('#installImg').src = 'icons/icon-192.png'; $('#installText').innerHTML = html; $('#installBtn').hidden = !withButton; $('#installBar').hidden = false;
   }
   if (onOwnSite) {
